@@ -11,7 +11,7 @@ export default function Dashboard() {
       </div>
 
       {/* Kartu-kartu data */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CardStatistik
           title="Gempa"
           count="15,127"
@@ -23,14 +23,21 @@ export default function Dashboard() {
           count="331"
           description="Gempa yang terjadi Tahun ini"
           badge="Tahun Ini"
-          color="text-teal-500"
+          color="text-blue-500"
         />
         <CardStatistik
           title="Gempa"
           count="45"
           description="Gempa yang terjadi Bulan ini"
           badge="Bulan Ini"
-          color="text-green-500"
+          color="text-blue-500"
+        />
+        <CardStatistik
+          title="Gempa"
+          count="3"
+          description="Gempa yang terjadi Hari ini"
+          badge="Hari Ini"
+          color="text-blue-500"
         />
       </div>
 
