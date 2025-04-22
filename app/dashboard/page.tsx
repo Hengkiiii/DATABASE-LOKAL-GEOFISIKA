@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import CardStatistik from "@/components/common/CardStatistikGempa";
+import { dataJumlahGempa } from "@/constants/DataJumlahGempa";
+import ChartJumlahGempa from "@/components/common/ChartJumlahGempa";
 
 export default function Dashboard() {
   return (
@@ -48,6 +50,9 @@ export default function Dashboard() {
         <span className="italic">(-4.48, 100.15)</span> | Kedalaman 10 KM |
         Magnitudo 3.9 SR | MMI -
       </div>
+
+      {/* Panggil Grafik Jumlah Gempa */}
+      <ChartJumlahGempa data={dataJumlahGempa} />
     </div>
   );
 }
