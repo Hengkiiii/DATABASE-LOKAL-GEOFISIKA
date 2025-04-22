@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx (atau halaman Dashboard-mu)
 "use client";
 import React from "react";
 import CardStatistik from "@/components/common/CardStatistikGempa";
@@ -33,6 +32,14 @@ export default function Dashboard() {
           badge="Bulan Ini"
           color="text-green-500"
         />
+      </div>
+
+      {/* Info Gempa Terakhir dalam bentuk baris panjang */}
+      <div className="mt-6 p-4 rounded bg-gray-50 text-gray-800 text-sm">
+        <span className="text-red-600 font-semibold">Gempa Terakhir</span>:
+        2025-04-15 02:58:45 | 237 km BaratDaya MUKOMUKO-BENGKULU{" "}
+        <span className="italic">(-4.48, 100.15)</span> | Kedalaman 10 KM |
+        Magnitudo 3.9 SR | MMI -
       </div>
     </div>
   );
