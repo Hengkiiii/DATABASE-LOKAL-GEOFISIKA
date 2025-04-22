@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import CardStatistik from "@/components/common/CardStatistikGempa";
-import { dataJumlahGempa } from "@/constants/DataJumlahGempa";
 import ChartJumlahGempa from "@/components/common/ChartJumlahGempa";
+import { dataJumlahGempa } from "@/constants/DataJumlahGempa";
 
 export default function Dashboard() {
   return (
@@ -43,7 +43,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Info Gempa Terakhir dalam bentuk baris panjang */}
+      {/* Info Gempa Terakhir */}
       <div className="mt-6 p-4 rounded bg-gray-50 text-gray-800 text-sm">
         <span className="text-red-600 font-semibold">Gempa Terakhir</span>:
         2025-04-15 02:58:45 | 237 km BaratDaya MUKOMUKO-BENGKULU{" "}
@@ -51,7 +51,7 @@ export default function Dashboard() {
         Magnitudo 3.9 SR | MMI -
       </div>
 
-      {/* Panggil Grafik Jumlah Gempa */}
+      {/* Grafik Gempa dengan Filter Tahun */}
       <ChartJumlahGempa data={dataJumlahGempa} />
     </div>
   );
