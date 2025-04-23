@@ -1,8 +1,9 @@
 // Mengimpor tipe data untuk tiap item hari hujan
-import { DataHariHujanProps } from "@/interface/common/DataHariHujanProps";
+import { DataTabelProps } from "@/interface/common/DataTableProps";
 
 // Interface untuk properti yang dikirim ke komponen TableHariHujan
-export interface TableHariHujanProps {
+export interface TabelProps {
   // 'data' adalah array dari objek DataHariHujanProps
-  data: DataHariHujanProps[];
+  dataHariHujan: DataTabelProps[];
+  dataPenguapan: DataTabelProps[];
 }
