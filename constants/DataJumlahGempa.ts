@@ -1,4 +1,3 @@
-// data/dataJumlahGempa.ts
 export const dataJumlahGempa = [
   // Tahun 2024
   { bulan: "JAN", jumlah: 68, tahun: 2024 },

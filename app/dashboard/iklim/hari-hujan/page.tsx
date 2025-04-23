@@ -1,7 +1,5 @@
-// app/hari-hujan/page.tsx
-
 import React from "react";
-import ChartHariHujan from "@/components/common/TabelHariHujan";
+import TabelHariHujan from "@/components/common/TabelHariHujan";
 import { dataHariHujan } from "@/constants/DataHariHujan";
 
 export default function HariHujanPage() {
@@ -14,7 +12,7 @@ export default function HariHujanPage() {
       </div>
 
       {/* Grafik Hari Hujan */}
-      <ChartHariHujan data={dataHariHujan} />
+      <TabelHariHujan data={dataHariHujan} />
     </div>
   );
 }
