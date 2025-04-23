@@ -7,13 +7,7 @@ import { dataHariHujan } from "@/constants/DataHariHujan";
 export default function HariHujanPage() {
   return (
     <div className="p-6 space-y-4">
-      {/* Notifikasi Selamat Datang */}
-      <div className="bg-green-100 border border-green-300 text-green-700 p-4 rounded">
-        Selamat datang di halaman Statistik Hari Hujan BMKG Stasiun Geofisika
-        Kepahiang.
-      </div>
-
-      {/* Info tambahan */}
+      {/* Info tambahan Data Terakhir*/}
       <div className="p-4 rounded bg-gray-50 text-gray-800 text-sm">
         <span className="text-green-600 font-semibold">Data Terakhir</span>:
         2023-09 | Jumlah Hari Hujan: 22 hari
