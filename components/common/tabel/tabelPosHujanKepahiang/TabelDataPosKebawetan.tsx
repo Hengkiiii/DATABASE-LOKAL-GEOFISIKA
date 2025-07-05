@@ -103,14 +103,6 @@ export default function TabelDataPosKebawetan() {
   }, []);
 
   useEffect(() => {
-    if (startDate && endDate) {
-      handleFilter();
-    } else if (!startDate && !endDate) {
-      fetchAllData();
-    }
-  }, [startDate, endDate]);
-
-  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
         setShowFilter(false);
@@ -145,7 +137,6 @@ export default function TabelDataPosKebawetan() {
         return;
       }
 
-      // Pilih objek yang sesuai dengan item.id dari array hasil response
       const detail = details.find((d: PosHujan) => d.id === item.id);
 
       if (!detail) {
