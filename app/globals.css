@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==== Custom Scrollbar Styling ==== */
+.scroll-custom::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-custom::-webkit-scrollbar-thumb {
+  background-color: #475569;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+.scroll-custom:hover::-webkit-scrollbar-thumb {
+  background-color: #64748b;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ==== Animasi Marker Pulse ==== */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.pulse-animate {
+  animation: pulse 1.2s ease-out infinite;
+  transform-origin: center;
+}
+
+/* ==== Marker Bulat (Custom Gempa) ==== */
+.marker-custom {
+  position: relative;
+  display: inline-block;
+}
+
+.pulse-ring {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.4));
+}
+
+.marker-core {
+  position: absolute;
+  border-radius: 9999px;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* === Warna berdasarkan kedalaman === */
+.marker-depth-1 {
+  background-color: #dc2626; /* Merah (≤50 km) */
+}
+.marker-depth-2 {
+  background-color: #f97316; /* Oranye (≤100 km) */
+}
+.marker-depth-3 {
+  background-color: #facc15; /* Kuning (≤250 km) */
+}
+.marker-depth-4 {
+  background-color: #16a34a; /* Hijau (≤600 km) */
+}
+.marker-depth-5 {
+  background-color: #2563eb; /* Biru (>600 km) */
+}
+
+/* ==== Marker Bintang ==== */
+.marker-star {
+  background: gold;
+  border: 2px solid black;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1em;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ==== Marker Kotak ==== */
+.marker-box {
+  background-color: gray;
+  border: 2px solid black;
+  font-weight: bold;
+  font-size: 1em;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ==== Kompas Button ==== */
+.compass-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.compass-button button {
+  background-color: #dc2626;
+  color: white;
+  font-size: 24px;
+  border: none;
+  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.compass-button button:hover {
+  background-color: #991b1b;
+}
+
+/* ==== Panel Filter ==== */
+.filter-panel {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.filter-panel button {
+  display: block;
+  width: 100%;
+  margin: 4px 0;
+  padding: 6px;
+  background-color: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.filter-panel button:hover {
+  background-color: #e5e7eb;
+}
+
+/* ==== Leaflet: Hilangkan garis hitam antar tile ==== */
+.leaflet-tile {
+  border: none !important;
+}
+.leaflet-tile-container img {
+  image-rendering: pixelated;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.custom-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+.leaflet-container {
+  z-index: 0;
+}
+.custom-icon {
+  z-index: 1000;
 }
