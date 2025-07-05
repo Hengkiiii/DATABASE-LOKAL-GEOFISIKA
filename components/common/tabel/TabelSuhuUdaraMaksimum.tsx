@@ -182,7 +182,7 @@ export default function TabelSuhuUdaraMaksimum({
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };

@@ -87,7 +87,7 @@ export default function TabelKelembaban({ reload }: KelembabanProps) {
     try {
       setLoading(true);
       const data = await getHumidityByDate(startDate, endDate);
-      const mapped = data.map((item: any) => {
+      const mapped = data.map((item: ApiHumidityItem) => {
         const pagi = item.humidity_07;
         const siang = item.humidity_13;
         const sore = item.humidity_18;

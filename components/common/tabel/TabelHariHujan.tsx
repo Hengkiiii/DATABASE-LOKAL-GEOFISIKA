@@ -84,7 +84,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       setDataHariHujan(mapped);
       sessionStorage.setItem("rainyDaysData", JSON.stringify(mapped));
       setShowFilter(false);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     } finally {
       setLoading(false);
@@ -180,7 +180,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
