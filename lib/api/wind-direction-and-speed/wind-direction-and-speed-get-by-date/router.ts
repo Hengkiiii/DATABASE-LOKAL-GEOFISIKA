@@ -1,5 +1,13 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface WindDirectionAndSpeed {
+  id: number;
+  tanggal: string;
+  kecepatan: number;
+  kecepatanMaksimum: number;
+  arah: string;
+  arahTerbanyak: string;
+}
 export async function getWindDirectionAndSpeedByDate(
   startDate: string,
   endDate: string
@@ -29,13 +37,13 @@ export async function getWindDirectionAndSpeedByDate(
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: WindDirectionAndSpeed) => ({
       id: item.id,
-      tanggal: item.date,
-      kecepatan: item.speed,
-      kecepatanMaksimum: item.max_speed,
-      arah: item.direction,
-      arahTerbanyak: item.most_frequent_direction,
+      tanggal: item.tanggal,
+      kecepatan: item.kecepatan,
+      kecepatanMaksimum: item.kecepatanMaksimum,
+      arah: item.arah,
+      arahTerbanyak: item.arahTerbanyak,
     }));
   } catch (error) {
     console.error(

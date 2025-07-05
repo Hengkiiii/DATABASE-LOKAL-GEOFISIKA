@@ -148,7 +148,7 @@ export default function TabelDataPosKebawetan() {
 
       setSelectedData(detail);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
