@@ -1,3 +1,4 @@
+"use client";
 import { useMedia } from "react-use";
 import React, { useState, FC } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
