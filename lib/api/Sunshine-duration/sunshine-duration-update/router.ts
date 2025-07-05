@@ -2,7 +2,7 @@ export async function updateSunshineDuration(
   id: string,
   user_id: string,
   dataUpdate: {
-    date: number;
+    date: string;
     sunshine_duration: string;
   }
 ): Promise<any> {

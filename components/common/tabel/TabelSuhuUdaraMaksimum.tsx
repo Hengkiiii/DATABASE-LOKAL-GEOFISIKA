@@ -18,9 +18,15 @@ import autoTable from "jspdf-autotable";
 
 interface TabelSuhuUdaraMaksimum {
   id: number;
-  date: number;
+  date: string;
   max_temperature: string;
 }
+interface ApiMaxTemperature {
+  id: number;
+  date: string;
+  max_temperature: string;
+}
+
 interface TabelSuhuUdaraMaksimumProps {
   reload?: boolean;
 }
@@ -51,13 +57,13 @@ export default function TabelSuhuUdaraMaksimum({
     try {
       setLoading(true);
       const data = await getMaxTemperatureAll();
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiMaxTemperature) => ({
         id: item.id,
         date: item.date,
         max_temperature: item.max_temperature,
       }));
       setDataSuhuUdaraMaksimum(mapped);
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengambil data semua");
     } finally {
       setLoading(false);
@@ -73,7 +79,7 @@ export default function TabelSuhuUdaraMaksimum({
       setLoading(true);
       const data = await getMaxTemperatureByDate(startDate, endDate);
       console.log("Data API:", data);
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiMaxTemperature) => ({
         id: item.id,
         date: item.date,
         max_temperature: item.max_temperature,
@@ -201,8 +207,11 @@ export default function TabelSuhuUdaraMaksimum({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal memperbarui data: " + error.message);
+    } catch (error) {
+      console.error("Gagal memperbarui data:", error);
+      if (error instanceof Error) {
+        toast.error("Gagal memperbarui data: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -225,8 +234,10 @@ export default function TabelSuhuUdaraMaksimum({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal menghapus data: " + error.message);
+    } catch (error) {
+      console.error("Gagal menghapus data:", error);
+      if (error instanceof Error)
+        toast.error("Gagal menghapus data: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -301,7 +312,13 @@ export default function TabelSuhuUdaraMaksimum({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-4 text-gray-500">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
                   <tr
                     key={index}
@@ -318,7 +335,6 @@ export default function TabelSuhuUdaraMaksimum({
                     </td>
                     <td className="py-3 px-5">
                       <div className="flex justify-center gap-3">
-                        {/* Tombol edit */}
                         <Button
                           icon={<Pencil />}
                           buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"

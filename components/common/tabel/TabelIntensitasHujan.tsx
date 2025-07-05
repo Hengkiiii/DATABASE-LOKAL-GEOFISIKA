@@ -21,6 +21,13 @@ interface TableIntensitasHujan {
   tanggal: string;
   file_base64: string;
 }
+interface RainIntensityAPIResponse {
+  id: number;
+  name: string;
+  date: string;
+  file_base64: string;
+}
+
 interface TableIntensitasHujanProps {
   reload?: boolean;
 }
@@ -54,7 +61,7 @@ export default function TableIntensitasHujan({
     try {
       setLoading(true);
       const data = await getAllDataRainIntensity();
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: RainIntensityAPIResponse) => ({
         id: item.id,
         name: item.name,
         tanggal: item.date,
@@ -78,7 +85,7 @@ export default function TableIntensitasHujan({
       setLoading(true);
       const data = await getDataRainIntensityByDate(startDate, endDate);
       console.log("Data API:", data);
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: RainIntensityAPIResponse) => ({
         id: item.id,
         name: item.name,
         tanggal: item.date,
@@ -125,7 +132,11 @@ export default function TableIntensitasHujan({
       setSelectedData(mapped);
       setShowEditModal(true);
     } catch (error) {
-      toast.error("Gagal memuat data untuk diedit");
+      if (error instanceof Error) {
+        toast.error("Gagal memperbarui data: " + error.message);
+      } else {
+        toast.error("Gagal memperbarui data: Terjadi kesalahan.");
+      }
     }
   };
 
@@ -152,9 +163,12 @@ export default function TableIntensitasHujan({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal memperbarui data: " + error.message);
-    } finally {
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Gagal memperbarui data: " + error.message);
+      } else {
+        toast.error("Gagal memperbarui data: Terjadi kesalahan.");
+      }
       setLoading(false);
     }
   };
@@ -178,8 +192,12 @@ export default function TableIntensitasHujan({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal menghapus data: " + error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Gagal menghapus data: " + error.message);
+      } else {
+        toast.error("Gagal menghapus data.");
+      }
     } finally {
       setLoading(false);
     }
@@ -250,7 +268,16 @@ export default function TableIntensitasHujan({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center py-6 text-blue-500 font-medium"
+                  >
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
                   <tr
                     key={index}

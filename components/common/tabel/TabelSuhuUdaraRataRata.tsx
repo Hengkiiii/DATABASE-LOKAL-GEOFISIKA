@@ -26,6 +26,13 @@ interface TabelSuhuUdaraRataRata {
 interface TabelSuhuUdaraRataRataProps {
   reload?: boolean;
 }
+interface ApiAverageTemperature {
+  id: number;
+  date: string;
+  avg_temperature_07: number;
+  avg_temperature_13: number;
+  avg_temperature_18: number;
+}
 
 export default function TabelSuhuUdaraRataRata({
   reload,
@@ -54,7 +61,7 @@ export default function TabelSuhuUdaraRataRata({
     try {
       setLoading(true);
       const data = await getAverageTemperatureAll();
-      const mapped = data.map((item: any) => {
+      const mapped = data.map((item: ApiAverageTemperature) => {
         const pagi = Number(item.avg_temperature_07) || 0;
         const siang = Number(item.avg_temperature_13) || 0;
         const sore = Number(item.avg_temperature_18) || 0;
@@ -72,7 +79,7 @@ export default function TabelSuhuUdaraRataRata({
         };
       });
       setAverageTemperatureData(mapped);
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengambil data semua");
     } finally {
       setLoading(false);
@@ -87,7 +94,7 @@ export default function TabelSuhuUdaraRataRata({
     try {
       setLoading(true);
       const data = await getAverageTemperatureByDate(startDate, endDate);
-      const mapped = data.map((item: any) => {
+      const mapped = data.map((item: ApiAverageTemperature) => {
         console.log("Item:", item);
         const pagi = item.avg_temperature_07;
         const siang = item.avg_temperature_13;
@@ -98,7 +105,7 @@ export default function TabelSuhuUdaraRataRata({
           : parseFloat(rataRataRaw.toFixed(2));
         return {
           id: item.id,
-          date: item.tanggal,
+          date: item.date,
           temperaturPagi: pagi,
           temperatureSiang: siang,
           temperatureSore: sore,
@@ -108,7 +115,7 @@ export default function TabelSuhuUdaraRataRata({
       setAverageTemperatureData(mapped);
       sessionStorage.setItem("averageTemperatureData", JSON.stringify(mapped));
       setCurrentPage(1);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memfilter data berdasarkan tanggal");
     } finally {
       setLoading(false);
@@ -217,7 +224,7 @@ export default function TabelSuhuUdaraRataRata({
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
@@ -343,7 +350,13 @@ export default function TabelSuhuUdaraRataRata({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-4 text-gray-500">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
                   <tr
                     key={index}

@@ -6,7 +6,7 @@ import { FiXCircle, FiTrash2 } from "react-icons/fi";
 
 interface ModalHapusSuhuUdaraMinimumProps {
   show: boolean;
-  data: { date: number; min_temperature: string } | null;
+  data: { date: string; min_temperature: string } | null;
   onClose: () => void;
   onDelete: () => void;
   isDarkMode: boolean;

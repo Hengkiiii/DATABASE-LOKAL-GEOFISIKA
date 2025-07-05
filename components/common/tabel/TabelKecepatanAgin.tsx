@@ -22,6 +22,15 @@ interface TabelKecepatanAngin {
   kecepatanTerbesar: number;
   arah: string;
 }
+interface WindDirectionAndSpeedAPIResponse {
+  id: number;
+  date: string;
+  speed: number;
+  most_frequent_direction: string;
+  max_speed: number;
+  direction: string;
+}
+
 interface TabelKecepatanAnginProps {
   reload?: boolean;
 }
@@ -53,7 +62,7 @@ export default function TabelKecepatanAngin({
     try {
       setLoading(true);
       const data = await getAllDataAngin();
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: WindDirectionAndSpeedAPIResponse) => ({
         id: item.id,
         tanggal: item.date,
         kecepatan: Number(item.speed) || 0,
@@ -79,18 +88,19 @@ export default function TabelKecepatanAngin({
       setLoading(true);
       const data = await getWindDirectionAndSpeedByDate(startDate, endDate);
       console.log("Data API:", data);
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: WindDirectionAndSpeedAPIResponse) => ({
         id: item.id,
-        tanggal: item.tanggal,
-        kecepatan: item.kecepatan,
-        kecepatanMaksimum: item.kecepatanMaksimum,
-        arah: item.arah,
-        arahTerbanyak: item.arahTerbanyak,
+        tanggal: item.date,
+        kecepatan: item.speed || 0,
+        kecepatanMaksimum: item.max_speed || 0,
+        arah: item.direction || "-",
+        arahTerbanyak: item.most_frequent_direction || "-",
       }));
       setWindData(mapped);
       sessionStorage.setItem("windData", JSON.stringify(mapped));
       setCurrentPage(1);
     } catch (error) {
+      console.error(error);
       toast.error("Gagal memfilter data berdasarkan tanggal");
     } finally {
       setLoading(false);
@@ -202,7 +212,7 @@ export default function TabelKecepatanAngin({
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
@@ -253,8 +263,8 @@ export default function TabelKecepatanAngin({
       } else {
         await fetchAllData();
       }
-    } catch (err) {
-      toast.error("Gagal menghapus data: " + (err as Error).message);
+    } catch (eror) {
+      toast.error("Gagal menghapus data: " + (eror as Error).message);
     } finally {
       setLoading(false);
     }

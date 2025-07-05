@@ -19,9 +19,15 @@ import autoTable from "jspdf-autotable";
 
 interface TabelLamaPenyinaran {
   id: number;
-  date: number;
+  date: string;
   sunshine_duration: string;
 }
+interface ApiSunshineItem {
+  id: number;
+  date: string;
+  sunshine_duration: string;
+}
+
 interface TabelLamaPenyinaranProps {
   reload?: boolean;
 }
@@ -55,7 +61,7 @@ export default function TabelLamaPenyinaran({
     try {
       setLoading(true);
       const data = await getSunshineDurationAll();
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiSunshineItem) => ({
         id: item.id,
         date: item.date,
         sunshine_duration: item.sunshine_duration,
@@ -78,7 +84,7 @@ export default function TabelLamaPenyinaran({
       setLoading(true);
       const data = await getSunshineDurationByDate(startDate, endDate);
       console.log("Data API:", data);
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiSunshineItem) => ({
         id: item.id,
         date: item.date,
         sunshine_duration: item.sunshine_duration,
@@ -185,7 +191,7 @@ export default function TabelLamaPenyinaran({
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
@@ -212,8 +218,12 @@ export default function TabelLamaPenyinaran({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal memperbarui data: " + error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Gagal memperbarui data: " + error.message);
+      } else {
+        toast.error("Gagal memperbarui data.");
+      }
     } finally {
       setLoading(false);
     }
@@ -239,8 +249,12 @@ export default function TabelLamaPenyinaran({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal menghapus data: " + error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Gagal menghapus data: " + error.message);
+      } else {
+        toast.error("Gagal menghapus data.");
+      }
     } finally {
       setLoading(false);
     }
@@ -314,7 +328,13 @@ export default function TabelLamaPenyinaran({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-4 text-gray-500">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
                   <tr
                     key={index}

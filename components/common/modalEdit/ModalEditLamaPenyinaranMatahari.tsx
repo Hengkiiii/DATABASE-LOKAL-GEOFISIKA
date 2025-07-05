@@ -7,7 +7,7 @@ import InputField from "@/components/common/InputField";
 
 interface TabelLamaPenyinaran {
   id: number;
-  date: number;
+  date: string;
   sunshine_duration: string;
 }
 
@@ -56,9 +56,7 @@ export default function ModalEditLamaPenyinaran({
                 label="Tanggal"
                 type="date"
                 value={data.date.toString()}
-                onChange={(e) =>
-                  setData({ ...data, date: Number(e.target.value) })
-                }
+                onChange={(e) => setData({ ...data, date: e.target.value })}
                 darkMode={isDarkMode}
               />
               <InputField

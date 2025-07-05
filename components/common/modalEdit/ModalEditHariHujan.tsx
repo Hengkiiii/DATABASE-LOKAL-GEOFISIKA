@@ -5,7 +5,7 @@ import { FiSave, FiXCircle } from "react-icons/fi";
 import InputField from "@/components/common/InputField";
 
 interface TabelHariHujan {
-  id: string;
+  id: number;
   date: string;
   rainyDay: string;
 }
@@ -52,7 +52,7 @@ export default function ModalEditHariHujan({
               <InputField
                 label="Hari Hujan"
                 type="text"
-                value={data.rainyDay}
+                value={data.rainyDay.toString()}
                 onChange={(e) => setData({ ...data, rainyDay: e.target.value })}
               />
             </div>

@@ -19,11 +19,16 @@ import autoTable from "jspdf-autotable";
 
 interface TabelSuhuUdaraMinimum {
   id: number;
-  date: number;
+  date: string;
   min_temperature: string;
 }
 interface TabelSuhuUdaraMinimumProps {
   reload?: boolean;
+}
+interface ApiMinTemperature {
+  id: number;
+  date: string;
+  min_temperature: string;
 }
 
 export default function TabelSuhuUdaraMinimum({
@@ -53,7 +58,7 @@ export default function TabelSuhuUdaraMinimum({
     try {
       setLoading(true);
       const data = await getMinTemperatureAll();
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiMinTemperature) => ({
         id: item.id,
         date: item.date,
         min_temperature: item.min_temperature,
@@ -76,7 +81,7 @@ export default function TabelSuhuUdaraMinimum({
       setLoading(true);
       const data = await getMinTemperatureByDate(startDate, endDate);
       console.log("Data API:", data);
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiMinTemperature) => ({
         id: item.id,
         date: item.date,
         min_temperature: item.min_temperature,
@@ -84,7 +89,7 @@ export default function TabelSuhuUdaraMinimum({
       setDataSuhuUdaraMinimum(mapped);
       sessionStorage.setItem("minTemperatureData", JSON.stringify(mapped));
       setCurrentPage(1);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memfilter data berdasarkan tanggal");
     } finally {
       setLoading(false);
@@ -178,7 +183,7 @@ export default function TabelSuhuUdaraMinimum({
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
@@ -203,8 +208,11 @@ export default function TabelSuhuUdaraMinimum({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal memperbarui data: " + error.message);
+    } catch (error) {
+      console.error("Gagal memperbarui data:", error);
+      if (error instanceof Error) {
+        toast.error("Gagal memperbarui data: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -228,8 +236,10 @@ export default function TabelSuhuUdaraMinimum({
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal menghapus data: " + error.message);
+    } catch (error) {
+      console.error("Gagal menghapus data:", error);
+      if (error instanceof Error)
+        toast.error("Gagal menghapus data: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -305,39 +315,53 @@ export default function TabelSuhuUdaraMinimum({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((item, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-gray-100 transition`}
-                >
-                  <td className="py-3 px-5">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
-                  <td className="py-3 px-5">{item.date}</td>
-                  <td className="py-3 px-5 text-center">
-                    {item.min_temperature}°C
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="flex justify-center gap-3">
-                      <Button
-                        icon={<Pencil />}
-                        buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
-                        onClick={() => handleEditClick(item.id)}
-                      />
-                      <Button
-                        icon={<Trash2 />}
-                        onClick={() => {
-                          setDataToDelete(item);
-                          setShowDeleteModal(true);
-                        }}
-                        buttonStyle="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
-                      />
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-4 text-gray-500">
+                    Memuat data...
                   </td>
                 </tr>
-              ))}
+              ) : paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100 transition`}
+                  >
+                    <td className="py-3 px-5">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="py-3 px-5">{item.date}</td>
+                    <td className="py-3 px-5 text-center">
+                      {item.min_temperature}°C
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="flex justify-center gap-3">
+                        <Button
+                          icon={<Pencil />}
+                          buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
+                          onClick={() => handleEditClick(item.id)}
+                        />
+                        <Button
+                          icon={<Trash2 />}
+                          onClick={() => {
+                            setDataToDelete(item);
+                            setShowDeleteModal(true);
+                          }}
+                          buttonStyle="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="text-center py-4 text-gray-500">
+                    Data tidak ditemukan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

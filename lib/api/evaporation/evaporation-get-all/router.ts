@@ -2,7 +2,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface EvaporationData {
   id: number;
-  evaporation: number;
+  evaporation: string;
   date: string;
 }
 

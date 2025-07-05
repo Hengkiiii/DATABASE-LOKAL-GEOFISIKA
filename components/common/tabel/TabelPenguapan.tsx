@@ -22,6 +22,12 @@ interface PenguapanData {
   tanggal: string;
   penguapan: string;
 }
+interface ApiEvaporationItem {
+  id: number;
+  date: string;
+  evaporation: string;
+}
+
 interface TabelPenguapanProps {
   reload?: boolean;
 }
@@ -48,7 +54,7 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
     try {
       setLoading(true);
       const data = await getEvaporationAll();
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiEvaporationItem) => ({
         id: item.id,
         tanggal: item.date,
         penguapan: item.evaporation,
@@ -67,7 +73,7 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
       setLoading(true);
       const data = await getEvaporationByDate(startDate, endDate);
       console.log("Data API:", data);
-      const mapped = data.map((item: any) => ({
+      const mapped = data.map((item: ApiEvaporationItem) => ({
         id: item.id,
         tanggal: item.date,
         penguapan: item.evaporation,
@@ -165,7 +171,7 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
         penguapan: data.evaporation,
       });
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit.");
     }
   };
@@ -190,8 +196,12 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal memperbarui data: " + error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Gagal memperbarui data: " + error.message);
+      } else {
+        toast.error("Gagal memperbarui data: " + String(error));
+      }
     } finally {
       setLoading(false);
     }
@@ -215,8 +225,12 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
       } else {
         await fetchAllData();
       }
-    } catch (error: any) {
-      toast.error("Gagal menghapus data: " + error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Gagal menghapus data: " + error.message);
+      } else {
+        toast.error("Gagal menghapus data: " + String(error));
+      }
     } finally {
       setLoading(false);
     }

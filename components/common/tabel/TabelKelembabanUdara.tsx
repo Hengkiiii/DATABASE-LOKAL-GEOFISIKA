@@ -22,6 +22,13 @@ interface HumidityData {
   kelembabanSore: number;
   kelembabanRataRata: number;
 }
+interface ApiHumidityItem {
+  id: string;
+  date: string;
+  humidity_07: number;
+  humidity_13: number;
+  humidity_18: number;
+}
 interface KelembabanProps {
   reload?: boolean;
 }
@@ -46,8 +53,8 @@ export default function TabelKelembaban({ reload }: KelembabanProps) {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const data = await getAllHumidityAll();
-      const mapped = data.map((item: any) => {
+      const data: ApiHumidityItem[] = await getAllHumidityAll();
+      const mapped: HumidityData[] = data.map((item) => {
         const pagi = Number(item.humidity_07) || 0;
         const siang = Number(item.humidity_13) || 0;
         const sore = Number(item.humidity_18) || 0;
@@ -65,7 +72,7 @@ export default function TabelKelembaban({ reload }: KelembabanProps) {
         };
       });
       setHumidityData(mapped);
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengambil data semua");
     } finally {
       setLoading(false);
@@ -100,7 +107,7 @@ export default function TabelKelembaban({ reload }: KelembabanProps) {
       setHumidityData(mapped);
       sessionStorage.setItem("humidityData", JSON.stringify(mapped));
       setCurrentPage(1);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memfilter data berdasarkan tanggal");
     } finally {
       setLoading(false);
@@ -203,7 +210,7 @@ export default function TabelKelembaban({ reload }: KelembabanProps) {
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };

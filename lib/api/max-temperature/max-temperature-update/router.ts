@@ -2,7 +2,7 @@ export async function updateMaxTemperature(
   id: string,
   user_id: string,
   dataUpdate: {
-    date: number;
+    date: string;
     max_temperature: string;
   }
 ): Promise<any> {

@@ -7,7 +7,7 @@ import InputField from "@/components/common/InputField";
 
 interface TabelSuhuUdaraMaksimum {
   id: number;
-  date: number;
+  date: string;
   max_temperature: string;
 }
 
@@ -56,9 +56,7 @@ export default function ModalEditSuhuUdaraMaksimum({
                 label="Tanggal"
                 type="date"
                 value={data.date.toString()}
-                onChange={(e) =>
-                  setData({ ...data, date: Number(e.target.value) })
-                }
+                onChange={(e) => setData({ ...data, date: e.target.value })}
                 darkMode={isDarkMode}
               />
               <InputField

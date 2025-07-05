@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export interface HumidityData {
-  id: number;
+  id: string;
   avg_humidity: number;
   humidity_07: number;
   humidity_13: number;

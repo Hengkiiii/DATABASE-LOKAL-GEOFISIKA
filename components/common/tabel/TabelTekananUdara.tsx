@@ -24,6 +24,13 @@ interface TabelTekananUdara {
   tekananSore: number;
   tekananUdara: number;
 }
+interface RawAirPressureData {
+  id: number;
+  date: string;
+  air_pressure_07: number | string | null;
+  air_pressure_13: number | string | null;
+  air_pressure_18: number | string | null;
+}
 
 interface TableTekananUdaraProps {
   reload?: boolean;
@@ -57,7 +64,7 @@ export default function TableTekananUdara({ reload }: TableTekananUdaraProps) {
       setLoading(true);
       const data = await getAirPressureAll();
 
-      const mapped = data.map((item: any) => {
+      const mapped = data.map((item: RawAirPressureData) => {
         const pagi = Number(item.air_pressure_07) || 0;
         const siang = Number(item.air_pressure_13) || 0;
         const sore = Number(item.air_pressure_18) || 0;
@@ -75,7 +82,7 @@ export default function TableTekananUdara({ reload }: TableTekananUdaraProps) {
         };
       });
       setAirPressureData(mapped);
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengambil data semua");
     } finally {
       setLoading(false);
@@ -90,15 +97,15 @@ export default function TableTekananUdara({ reload }: TableTekananUdaraProps) {
     try {
       setLoading(true);
       const data = await getAirPressureByDate(startDate, endDate);
-      const mapped = data.map((item: any) => {
-        console.log("Item:", item);
-        const pagi = item.air_pressure_07;
-        const siang = item.air_pressure_13;
-        const sore = item.air_pressure_18;
+      const mapped = data.map((item: RawAirPressureData) => {
+        const pagi = Number(item.air_pressure_07) || 0;
+        const siang = Number(item.air_pressure_13) || 0;
+        const sore = Number(item.air_pressure_18) || 0;
         const rataRataRaw = (pagi + siang + sore) / 3;
         const rataRata = isNaN(rataRataRaw)
           ? 0
           : parseFloat(rataRataRaw.toFixed(2));
+
         return {
           id: item.id,
           tanggal: item.date,
@@ -108,10 +115,11 @@ export default function TableTekananUdara({ reload }: TableTekananUdaraProps) {
           tekananUdara: rataRata,
         };
       });
+
       setAirPressureData(mapped);
       sessionStorage.setItem("airPressureData", JSON.stringify(mapped));
       setCurrentPage(1);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memfilter data berdasarkan tanggal");
     } finally {
       setLoading(false);
@@ -222,7 +230,7 @@ export default function TableTekananUdara({ reload }: TableTekananUdaraProps) {
       };
       setSelectedData(mapped);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };

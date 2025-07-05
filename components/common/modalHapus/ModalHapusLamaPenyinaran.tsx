@@ -6,7 +6,7 @@ import { FiXCircle, FiTrash2 } from "react-icons/fi";
 
 interface ModalHapusLamaPenyinaranProps {
   show: boolean;
-  data: { date: number; sunshine_duration: string } | null;
+  data: { date: string; sunshine_duration: string } | null;
   onClose: () => void;
   onDelete: () => void;
   isDarkMode: boolean;

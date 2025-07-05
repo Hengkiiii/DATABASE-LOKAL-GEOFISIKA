@@ -1,17 +1,17 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-interface RainyDayData {
+interface RainyDayAPIResponse {
   id: number;
   date: string;
-  rainy_day: number;
+  rainy_day: string;
 }
 
 interface GetRainyDaysResponse {
   success: boolean;
   message: string;
-  data: RainyDayData[];
+  data: RainyDayAPIResponse[];
 }
 
-export async function getRainyDaysAll(): Promise<RainyDayData[]> {
+export async function getRainyDaysAll(): Promise<RainyDayAPIResponse[]> {
   try {
     const response = await fetch(`${API_BASE_URL}rainy-days/get-all`, {
       method: "GET",
