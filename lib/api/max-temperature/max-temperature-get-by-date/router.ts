@@ -1,5 +1,10 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface MaxTemperatureData {
+  id: number;
+  max_temperature: number;
+  date: string;
+}
 export async function getMaxTemperatureByDate(
   startDate: string,
   endDate: string
@@ -29,7 +34,7 @@ export async function getMaxTemperatureByDate(
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: MaxTemperatureData) => ({
       id: item.id,
       max_temperature: item.max_temperature,
       date: item.date,

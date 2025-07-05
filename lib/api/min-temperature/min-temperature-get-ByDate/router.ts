@@ -1,5 +1,10 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface MinTemperatureData {
+  id: number;
+  min_temperature: number;
+  date: string;
+}
 export async function getMinTemperatureByDate(
   startDate: string,
   endDate: string
@@ -29,7 +34,7 @@ export async function getMinTemperatureByDate(
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: MinTemperatureData) => ({
       id: item.id,
       min_temperature: item.min_temperature,
       date: item.date,

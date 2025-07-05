@@ -1,3 +1,16 @@
+interface UpdateRainGaugeResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    date: string;
+    name: string;
+    city: string;
+    village: string;
+    file_url: string;
+  };
+}
+
 export async function updateRainGauge(
   id: string | number,
   user_id: string,
@@ -8,7 +21,7 @@ export async function updateRainGauge(
     village?: string;
     file_url?: string;
   }
-): Promise<any> {
+): Promise<UpdateRainGaugeResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}rain-gauge/update?id=${encodeURIComponent(
     id
@@ -32,7 +45,7 @@ export async function updateRainGauge(
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
         console.error("updateRainGauge: error response", errorData);
-      } catch (e) {
+      } catch {
         console.error("updateRainGauge: gagal parsing error response");
       }
       throw new Error(errorMessage);

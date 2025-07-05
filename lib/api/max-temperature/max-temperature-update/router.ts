@@ -1,3 +1,13 @@
+interface UpdateMaxTemperatureResponse {
+  success: boolean;
+  message: string;
+  data: MaxTemperatureData;
+}
+interface MaxTemperatureData {
+  id: number;
+  max_temperature: number;
+  date: string;
+}
 export async function updateMaxTemperature(
   id: string,
   user_id: string,
@@ -5,7 +15,7 @@ export async function updateMaxTemperature(
     date: string;
     max_temperature: string;
   }
-): Promise<any> {
+): Promise<UpdateMaxTemperatureResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}max-temperature/update?id=${id}&user_id=${user_id}`;
 

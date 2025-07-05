@@ -1,5 +1,14 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface MicrothermorData {
+  id: number;
+  latitude: number;
+  longitude: number;
+  FO: number;
+  AO: number;
+  TDOM: string;
+  KG: number;
+}
 export async function getMicrothermorByTDOM(minTdom: string, maxTdom: string) {
   if (minTdom === undefined || maxTdom === undefined) {
     throw new Error("Nilai minimum dan maksimum TDOM harus diisi");
@@ -26,7 +35,7 @@ export async function getMicrothermorByTDOM(minTdom: string, maxTdom: string) {
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: MicrothermorData) => ({
       id: item.id,
       latitude: item.latitude,
       longitude: item.longitude,

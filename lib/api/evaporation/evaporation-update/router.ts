@@ -1,3 +1,13 @@
+interface UpdateEvaporationResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: number;
+    date: string;
+    evaporation: number;
+  };
+}
+
 export async function updateEvaporation(
   user_id: string,
   id: string,
@@ -5,7 +15,7 @@ export async function updateEvaporation(
     date: string;
     evaporation: string;
   }
-): Promise<any> {
+): Promise<UpdateEvaporationResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}evaporation/update?id=${id}&user_id=${user_id}`;
 
@@ -19,7 +29,7 @@ export async function updateEvaporation(
       body: JSON.stringify(dataUpdate),
     });
 
-    const data = await response.json();
+    const data: UpdateEvaporationResponse = await response.json();
 
     if (!response.ok) {
       console.error("Error response dari server:", data);

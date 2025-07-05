@@ -1,5 +1,14 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface HumidityDataResponse {
+  id: number;
+  humidity_07: number;
+  humidity_13: number;
+  humidity_18: number;
+  avg_humidity: number;
+  date: string;
+}
+
 export async function getHumidityByDate(startDate: string, endDate: string) {
   if (!startDate || !endDate) {
     throw new Error("Tanggal mulai dan akhir harus diisi");
@@ -26,7 +35,7 @@ export async function getHumidityByDate(startDate: string, endDate: string) {
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: HumidityDataResponse) => ({
       id: item.id,
       humidity_07: item.humidity_07,
       humidity_13: item.humidity_13,

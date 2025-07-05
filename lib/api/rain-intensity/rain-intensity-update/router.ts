@@ -1,3 +1,13 @@
+interface UpdateRainIntensityResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    date: string;
+    name: string;
+    file_url: string;
+  };
+}
 export async function updateDataRainIntensity(
   id: string,
   user_id: string,
@@ -6,7 +16,7 @@ export async function updateDataRainIntensity(
     date: string;
     file_base64: string;
   }
-): Promise<any> {
+): Promise<UpdateRainIntensityResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}rain-intensity/update?id=${id}&user_id=${user_id}`;
 

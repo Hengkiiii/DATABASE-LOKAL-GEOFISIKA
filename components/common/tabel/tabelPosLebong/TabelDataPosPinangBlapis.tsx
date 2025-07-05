@@ -8,7 +8,7 @@ import Card from "@/components/common/Card";
 import Button from "@/components/common/Button";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-
+import InputField from "@/components/common/InputField";
 import { getDataPosHujanByCityVillage } from "@/lib/api/rain-gauge/rain-gauge-get-by-city-village/router";
 import { deleteDataPosHujan } from "@/lib/api/rain-gauge/rain-gauge-delete/router";
 import { getDataPosHujanByDate } from "@/lib/api/rain-gauge/rain-gauge-get-by-date/router";
@@ -81,6 +81,10 @@ export default function TabelDataPosKebawetan() {
 
       if (response && response.success && Array.isArray(response.data)) {
         setData(response.data);
+        sessionStorage.setItem(
+          "dataPosPinangBlapis",
+          JSON.stringify(response.data)
+        );
       } else {
         setData([]);
         toast.warning("Format data filter tidak valid");
@@ -97,14 +101,6 @@ export default function TabelDataPosKebawetan() {
   useEffect(() => {
     fetchAllData();
   }, []);
-
-  useEffect(() => {
-    if (startDate && endDate) {
-      handleFilter();
-    } else if (!startDate && !endDate) {
-      fetchAllData();
-    }
-  }, [startDate, endDate]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -152,7 +148,7 @@ export default function TabelDataPosKebawetan() {
 
       setSelectedData(detail);
       setShowEditModal(true);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
   };
@@ -243,41 +239,51 @@ export default function TabelDataPosKebawetan() {
           <Button
             icon={<Funnel size={18} />}
             onClick={() => setShowFilter((prev) => !prev)}
-            buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
-            title="Filter Tanggal"
+            buttonStyle="px-4 py-2 rounded-xl font-medium shadow-md hover:scale-105 transition cursor-pointer bg-gray-100 text-gray-700"
           />
+          {showFilter && (
+            <div
+              ref={filterRef}
+              className="absolute right-0 top-12 z-50 border border-gray-200 rounded-lg shadow-lg p-4 w-64 bg-white space-y-3"
+            >
+              <InputField
+                label="Dari Tanggal:"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <InputField
+                label="Sampai Tanggal:"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+              <div className="flex justify-between gap-2 pt-2">
+                <Button
+                  title="Terapkan"
+                  onClick={handleFilter}
+                  buttonStyle="flex-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+                />
+                <Button
+                  title="Reset"
+                  onClick={() => {
+                    setStartDate("");
+                    setEndDate("");
+                    sessionStorage.removeItem("dataPosPinangBlapis");
+                    fetchAllData();
+                    setShowFilter(false);
+                  }}
+                  buttonStyle="flex-1 px-3 py-2 text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 rounded-lg shadow"
+                />
+              </div>
+            </div>
+          )}
           <Button
             icon={<X size={17} />}
             onClick={() => router.back()}
             buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
             aria-label="Kembali"
           ></Button>
-
-          {showFilter && (
-            <div
-              ref={filterRef}
-              className="absolute right-0 top-12 z-50 bg-white border rounded-lg shadow-lg p-4 w-64 space-y-3"
-            >
-              <div className="flex flex-col text-sm">
-                <label className="text-gray-600">Dari Tanggal:</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="px-3 py-2 border rounded"
-                />
-              </div>
-              <div className="flex flex-col text-sm">
-                <label className="text-gray-600">Sampai Tanggal:</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="px-3 py-2 border rounded"
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

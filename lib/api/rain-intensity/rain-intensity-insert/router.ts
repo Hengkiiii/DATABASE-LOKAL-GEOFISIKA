@@ -41,7 +41,7 @@ export async function insertRainIntensity({
       try {
         const errorData = JSON.parse(rawText);
         errorMessage = errorData.message || errorMessage;
-      } catch (_) {}
+      } catch {}
       throw new Error(errorMessage);
     }
 

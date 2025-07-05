@@ -2,10 +2,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function tambahDataAverageTemperature(
   user_id: string,
-  avg_temperature: Number,
-  avg_temperature_07: Number,
-  avg_temperature_13: Number,
-  avg_temperature_18: Number,
+  avg_temperature: number,
+  avg_temperature_07: number,
+  avg_temperature_13: number,
+  avg_temperature_18: number,
   date: string
 ) {
   try {

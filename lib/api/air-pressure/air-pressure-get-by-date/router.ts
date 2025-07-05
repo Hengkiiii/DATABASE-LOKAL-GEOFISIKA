@@ -1,5 +1,14 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface AirPressureItem {
+  id: number;
+  air_pressure_07: string;
+  air_pressure_13: string;
+  air_pressure_18: string;
+  air_pressure: string;
+  date: string;
+}
+
 export async function getAirPressureByDate(startDate: string, endDate: string) {
   if (!startDate || !endDate) {
     throw new Error("Tanggal mulai dan akhir harus diisi");
@@ -26,7 +35,7 @@ export async function getAirPressureByDate(startDate: string, endDate: string) {
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: AirPressureItem) => ({
       id: item.id,
       air_pressure_07: item.air_pressure_07,
       air_pressure_13: item.air_pressure_13,

@@ -1,3 +1,13 @@
+interface UpdateDataTimeSignatureResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    date: string;
+    file_url: string;
+  };
+}
 export async function updateDataTimeSignature(
   id: string,
   user_id: string,
@@ -6,7 +16,7 @@ export async function updateDataTimeSignature(
     date: string;
     file_base64: string;
   }
-): Promise<any> {
+): Promise<UpdateDataTimeSignatureResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}time-signature/update?id=${id}&user_id=${user_id}`;
 

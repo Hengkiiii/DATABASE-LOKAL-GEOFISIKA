@@ -30,7 +30,7 @@ export async function getActivityById(
       try {
         const errorResult = JSON.parse(rawText);
         if (errorResult.message) errorMessage = errorResult.message;
-      } catch (_) {}
+      } catch {}
       throw new Error(errorMessage);
     }
 

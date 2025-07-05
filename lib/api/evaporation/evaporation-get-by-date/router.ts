@@ -1,5 +1,9 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
+interface EvaporationData {
+  id: number;
+  evaporation: number;
+  date: string;
+}
 export async function getEvaporationByDate(startDate: string, endDate: string) {
   if (!startDate || !endDate) {
     throw new Error("Tanggal mulai dan akhir harus diisi");
@@ -26,7 +30,7 @@ export async function getEvaporationByDate(startDate: string, endDate: string) {
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: EvaporationData) => ({
       id: item.id,
       evaporation: item.evaporation,
       date: item.date,

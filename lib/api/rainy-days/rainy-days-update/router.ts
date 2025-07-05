@@ -1,3 +1,12 @@
+interface UpdateRainyDayResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    date: string;
+    rainy_day: string;
+  };
+}
 export async function updateRainyDay(
   id: string,
   user_id: string,
@@ -5,7 +14,7 @@ export async function updateRainyDay(
     date: string;
     rainy_day: string;
   }
-): Promise<any> {
+): Promise<UpdateRainyDayResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}rainy-days/update?id=${id}&user_id=${user_id}`;
 

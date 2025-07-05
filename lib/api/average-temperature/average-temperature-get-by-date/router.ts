@@ -1,5 +1,14 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface AverageTemperatureItem {
+  id: number;
+  avg_temperature_07: string;
+  avg_temperature_13: string;
+  avg_temperature_18: string;
+  avg_temperature: string;
+  date: string;
+}
+
 export async function getAverageTemperatureByDate(
   startDate: string,
   endDate: string
@@ -29,7 +38,7 @@ export async function getAverageTemperatureByDate(
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: AverageTemperatureItem) => ({
       id: item.id,
       avg_temperature_07: item.avg_temperature_07,
       avg_temperature_13: item.avg_temperature_13,

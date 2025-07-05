@@ -1,3 +1,17 @@
+interface MicrothermorData {
+  id: number;
+  latitude: string;
+  longitude: string;
+  FO: string;
+  AO: string;
+  TDOM: string;
+  KG: string;
+}
+interface UpdateMicrothermorResponse {
+  success: boolean;
+  message: string;
+  data: MicrothermorData;
+}
 export async function updateDataMicrothermor(
   id: string,
   user_id: string,
@@ -9,7 +23,7 @@ export async function updateDataMicrothermor(
     TDOM: string;
     KG: string;
   }
-): Promise<any> {
+): Promise<UpdateMicrothermorResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}microthermor/update?id=${id}&user_id=${user_id}`;
 

@@ -1,5 +1,9 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
+interface SunshineDuration {
+  id: number;
+  sunshine_duration: number;
+  date: string;
+}
 export async function getSunshineDurationByDate(
   startDate: string,
   endDate: string
@@ -29,7 +33,7 @@ export async function getSunshineDurationByDate(
 
     const data = result.data;
 
-    return data.map((item: any) => ({
+    return data.map((item: SunshineDuration) => ({
       id: item.id,
       sunshine_duration: item.sunshine_duration,
       date: item.date,

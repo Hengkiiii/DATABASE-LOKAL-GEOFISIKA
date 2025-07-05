@@ -18,7 +18,7 @@ export async function hapusDataRainIntensity(id: string, user_id: string) {
       try {
         const errorData = JSON.parse(text);
         errorMessage = errorData.message || errorMessage;
-      } catch (e) {}
+      } catch {}
       throw new Error(errorMessage);
     }
 

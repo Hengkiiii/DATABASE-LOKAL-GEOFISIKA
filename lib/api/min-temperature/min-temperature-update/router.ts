@@ -1,11 +1,21 @@
+interface UpdateMinTemperatureResponse {
+  success: boolean;
+  message: string;
+  data: MinTemperatureData;
+}
+interface MinTemperatureData {
+  id: number;
+  min_temperature: number;
+  date: string;
+}
 export async function updateMinTemperature(
   id: string,
   user_id: string,
   dataUpdate: {
-    date: number;
+    date: string;
     min_temperature: string;
   }
-): Promise<any> {
+): Promise<UpdateMinTemperatureResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const url = `${API_BASE_URL}min-temperature/update?id=${id}&user_id=${user_id}`;
 

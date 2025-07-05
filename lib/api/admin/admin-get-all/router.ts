@@ -1,5 +1,15 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface AdminResponseItem {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  photo: string;
+  role: string;
+  user_id?: string;
+}
+
 export async function getAdminAll() {
   try {
     const response = await fetch(`${API_BASE_URL}admin/get-all`, {
@@ -16,7 +26,7 @@ export async function getAdminAll() {
 
     console.log("Data admin berhasil diambil:", data);
 
-    return data.map((admin: any) => ({
+    return data.map((admin: AdminResponseItem) => ({
       id: admin.id,
       email: admin.email,
       firstName: admin.first_name,

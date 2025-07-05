@@ -36,7 +36,7 @@ export async function tambahDataTimeSignature({
       try {
         const errorData = JSON.parse(rawText);
         errorMessage = errorData.message || errorMessage;
-      } catch (_) {
+      } catch {
         // parsing gagal, abaikan
       }
       throw new Error(errorMessage);
