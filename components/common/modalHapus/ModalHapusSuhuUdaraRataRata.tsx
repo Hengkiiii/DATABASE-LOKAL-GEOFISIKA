@@ -46,7 +46,7 @@ export default function DeleteModal({
               Apakah Anda yakin ingin menghapus data tanggal{" "}
               <span className="font-semibold">{data.tanggal}</span> dengan
               tekanan udara{" "}
-              <span className="font-semibold">{data.suhuUdaraRataRata}</span>?
+              <span className="font-semibold">{data.temperaturUdara}</span>?
             </p>
             <div className="flex justify-end gap-3 pt-4">
               <Button

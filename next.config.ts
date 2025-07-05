@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: [
+      "i.pravatar.cc", // Avatar random
+      "iiryrpggrlwhcuzlgbot.supabase.co", // ✅ Supabase storage domain
+    ],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

@@ -16,7 +16,7 @@ const FloatingLabelForm: FC<FloatingLabelFormProps> = ({
   const [showPassword, setShowPassword] = useState(false); // Menyimpan status visibility password
   const isDarkMode = useMedia("(prefers-color-scheme: dark)", false); // Menentukan mode gelap atau terang
 
-  const hasText = value.length > 0 || isFocused; // Mengecek apakah input memiliki teks atau fokus
+  const hasText = (value?.length ?? 0) > 0 || isFocused;
   const isPassword = type === "password"; // Mengecek apakah tipe input password
 
   const handleTogglePassword = () => {

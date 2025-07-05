@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L, { LatLngTuple } from "leaflet";
+import * as L from "leaflet";
 import { FiAlertTriangle } from "react-icons/fi";
 import ReactDOMServer from "react-dom/server";
 
@@ -74,18 +74,21 @@ const Legend = () => {
   const map = useMap();
 
   useEffect(() => {
-    const legend = L.control({ position: "bottomleft" });
-
-    legend.onAdd = () => {
+    const controlFn = L.control as unknown as (
+      options?: L.ControlOptions
+    ) => L.Control;
+    const legend = controlFn({ position: "bottomleft" });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    legend.onAdd = (_: L.Map): HTMLElement => {
       const div = L.DomUtil.create("div", "info legend");
       div.innerHTML = `
-      <div style="background: white; padding: 8px; border-radius: 8px; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2)">
-        <div style="margin-bottom: 6px"><strong>Legenda TDOM</strong></div>
-        <div><span style="background:#e63946;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> ≥ 5.0 Risiko Tinggi</div>
-        <div><span style="background:#f4a261;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> 2.5 - 4.9 Risiko Sedang</div>
-        <div><span style="background:#2a9d8f;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> &lt; 2.5 Risiko Rendah</div>
-      </div>
-    `;
+        <div style="background: white; padding: 8px; border-radius: 8px; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2)">
+          <div style="margin-bottom: 6px"><strong>Legenda TDOM</strong></div>
+          <div><span style="background:#e63946;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> ≥ 5.0 Risiko Tinggi</div>
+          <div><span style="background:#f4a261;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> 2.5 - 4.9 Risiko Sedang</div>
+          <div><span style="background:#2a9d8f;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> &lt; 2.5 Risiko Rendah</div>
+        </div>
+      `;
       return div;
     };
 
@@ -161,7 +164,7 @@ export default function PetaRawanGempa() {
               return null;
 
             const buffer = 0.01;
-            const polygonCoords: LatLngTuple[] = [
+            const polygonCoords: L.LatLngExpression[] = [
               [lat - buffer, lng - buffer],
               [lat - buffer, lng + buffer],
               [lat + buffer, lng + buffer],
