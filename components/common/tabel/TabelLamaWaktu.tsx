@@ -26,8 +26,11 @@ interface ApiTimeSignatureItem {
   date: string;
   file_base64: string;
 }
+interface TableTandaWaktuProps {
+  reload?: boolean;
+}
 
-export default function TableTandaWaktu() {
+export default function TableTandaWaktu({ reload }: TableTandaWaktuProps) {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [showFilter, setShowFilter] = useState(false);
@@ -89,7 +92,7 @@ export default function TableTandaWaktu() {
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [reload]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -186,158 +189,159 @@ export default function TableTandaWaktu() {
   };
 
   return (
-    <Card style="bg-white p-6 md:p-8 space-y-6 shadow-xl rounded-2xl mt-6 ml-6 mr-6 relative">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Data Tanda Waktu</h2>
-        <div className="flex flex-wrap gap-2 relative">
-          <Button
-            icon={<Printer />}
-            buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
-          />
-          <button
-            onClick={() => setShowFilter((prev) => !prev)}
-            className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
-            title="Filter Tanggal"
-          >
-            <Funnel size={18} />
-          </button>
-          {showFilter && (
-            <div
-              ref={filterRef}
-              className="absolute right-0 top-12 z-50 bg-white border rounded-lg shadow-lg p-4 w-64 space-y-3"
+    <>
+      <Card style=" p-4 pb-4 space-y-4 shadow-xl rounded-2xl bg-white text-gray-800">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-800">Data Tanda Waktu</h2>
+          <div className="flex flex-wrap gap-2 relative">
+            <Button
+              icon={<Printer />}
+              buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
+            />
+            <button
+              onClick={() => setShowFilter((prev) => !prev)}
+              className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
+              title="Filter Tanggal"
             >
-              <div className="flex flex-col text-sm">
-                <label className="text-gray-600">Dari Tanggal:</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-3 py-2 border rounded"
-                />
+              <Funnel size={18} />
+            </button>
+            {showFilter && (
+              <div
+                ref={filterRef}
+                className="absolute right-0 top-12 z-50 bg-white border rounded-lg shadow-lg p-4 w-64 space-y-3"
+              >
+                <div className="flex flex-col text-sm">
+                  <label className="text-gray-600">Dari Tanggal:</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => {
+                      setStartDate(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="px-3 py-2 border rounded"
+                  />
+                </div>
+                <div className="flex flex-col text-sm">
+                  <label className="text-gray-600">Sampai Tanggal:</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => {
+                      setEndDate(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="px-3 py-2 border rounded"
+                  />
+                </div>
               </div>
-              <div className="flex flex-col text-sm">
-                <label className="text-gray-600">Sampai Tanggal:</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-3 py-2 border rounded"
-                />
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-gray-700 border-collapse rounded-lg overflow-hidden">
-          <thead className="bg-gray-100 text-gray-600">
-            <tr>
-              <th className="py-3 px-5 text-left">No.</th>
-              <th className="py-3 px-5 text-left">Tanggal</th>
-              <th className="py-3 px-5 text-left">Nama</th>
-              <th className="py-3 px-5 text-center w-24">Unduh</th>
-              <th className="py-3 px-5 text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-gray-700 border-collapse rounded-lg overflow-hidden">
+            <thead className="bg-gray-100 text-gray-600">
               <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  Sedang memuat data...
-                </td>
+                <th className="py-3 px-5 text-left">No.</th>
+                <th className="py-3 px-5 text-left">Tanggal</th>
+                <th className="py-3 px-5 text-left">Nama</th>
+                <th className="py-3 px-5 text-center w-24">Unduh</th>
+                <th className="py-3 px-5 text-center">Aksi</th>
               </tr>
-            ) : paginatedData.length > 0 ? (
-              paginatedData.map((item, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-gray-100 transition`}
-                >
-                  <td className="py-3 px-5">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
-                  <td className="py-3 px-5">{item.tanggal}</td>
-                  <td className="py-3 px-5">{item.name}</td>
-                  <td className="py-3 px-5 text-center">
-                    <a
-                      href={item.file_base64}
-                      download
-                      className="inline-flex items-center justify-center w-full h-full text-blue-600 hover:underline"
-                    >
-                      <Download size={20} />
-                    </a>
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="flex justify-center gap-3">
-                      <Button
-                        icon={<Pencil />}
-                        buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
-                        onClick={() => handleEditClick(item.id)}
-                      />
-                      <Button
-                        icon={<Trash2 />}
-                        onClick={() => {
-                          setDataToDelete(item);
-                          setShowDeleteModal(true);
-                        }}
-                        buttonStyle="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
-                      />
-                    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                    Sedang memuat data...
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  Data tidak ditemukan.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100 transition`}
+                  >
+                    <td className="py-3 px-5">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="py-3 px-5">{item.tanggal}</td>
+                    <td className="py-3 px-5">{item.name}</td>
+                    <td className="py-3 px-5 text-center">
+                      <a
+                        href={item.file_base64}
+                        download
+                        className="inline-flex items-center justify-center w-full h-full text-blue-600 hover:underline"
+                      >
+                        <Download size={20} />
+                      </a>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="flex justify-center gap-3">
+                        <Button
+                          icon={<Pencil />}
+                          buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
+                          onClick={() => handleEditClick(item.id)}
+                        />
+                        <Button
+                          icon={<Trash2 />}
+                          onClick={() => {
+                            setDataToDelete(item);
+                            setShowDeleteModal(true);
+                          }}
+                          buttonStyle="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                    Data tidak ditemukan.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center gap-6 pt-6">
-        <Button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          buttonStyle={`flex items-center gap-2 text-sm font-medium transition ${
-            currentPage === 1
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-700 hover:text-black"
-          }`}
-          icon={<MdArrowBackIosNew size={18} className="mt-1" />}
-        >
-          Back
-        </Button>
-        <span className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white text-sm font-medium shadow">
-          {currentPage}
-        </span>
-        <Button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-          buttonStyle={`flex items-center gap-2 text-sm font-medium transition ${
-            currentPage === totalPages
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-700 hover:text-black"
-          }`}
-        >
-          Next
-          <MdArrowForwardIos size={18} className="mt-1" />
-        </Button>
-      </div>
-      {/* Modal Edit */}
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-6 pt-6">
+          <Button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            buttonStyle={`flex items-center gap-2 text-sm font-medium transition ${
+              currentPage === 1
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-700 hover:text-black"
+            }`}
+            icon={<MdArrowBackIosNew size={18} className="mt-1" />}
+          >
+            Back
+          </Button>
+          <span className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white text-sm font-medium shadow">
+            {currentPage}
+          </span>
+          <Button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            buttonStyle={`flex items-center gap-2 text-sm font-medium transition ${
+              currentPage === totalPages
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-700 hover:text-black"
+            }`}
+          >
+            Next
+            <MdArrowForwardIos size={18} className="mt-1" />
+          </Button>
+        </div>
+      </Card>
       <ModalEditTandaWaktu
         show={showEditModal}
         isDarkMode={false}
@@ -346,8 +350,6 @@ export default function TableTandaWaktu() {
         onSave={handleSaveEdit}
         setData={setSelectedData}
       />
-
-      {/* Modal Hapus */}
       <ModalHapusTandaWaktu
         show={showDeleteModal}
         isDarkMode={false}
@@ -355,6 +357,6 @@ export default function TableTandaWaktu() {
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleDelete}
       />
-    </Card>
+    </>
   );
 }

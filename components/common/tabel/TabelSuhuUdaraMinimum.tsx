@@ -189,11 +189,19 @@ export default function TabelSuhuUdaraMinimum({
   };
   const handleSaveEdit = async () => {
     if (!selectedData) return;
+
     const user_id = sessionStorage.getItem("user_id");
     if (!user_id) {
       toast.error("User ID tidak ditemukan di sessionStorage.");
       return;
     }
+
+    // Validasi suhu tidak boleh > 25
+    if (parseFloat(selectedData.min_temperature) > 25) {
+      toast.warning("Suhu udara minimum seharusnya tidak lebih dari 25°C");
+      return;
+    }
+
     try {
       setLoading(true);
       await updateMinTemperature(selectedData.id.toString(), user_id, {

@@ -177,16 +177,25 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
   };
   const handleSaveEdit = async () => {
     if (!selectedData) return;
+    const penguapanValue = selectedData.penguapan;
+    if (!/^[0-9]*\.?[0-9]*$/.test(penguapanValue)) {
+      toast.warning(
+        "Penguapan harus berupa angka dan tidak boleh mengandung huruf atau simbol negatif."
+      );
+      return;
+    }
+
     const user_id = sessionStorage.getItem("user_id");
     if (!user_id) {
       toast.error("User ID tidak ditemukan di sessionStorage.");
       return;
     }
+
     try {
       setLoading(true);
       await updateEvaporation(user_id, selectedData.id.toString(), {
         date: selectedData.tanggal,
-        evaporation: selectedData.penguapan,
+        evaporation: penguapanValue,
       });
       toast.success("Data penguapan berhasil diupdate!");
       setShowEditModal(false);
@@ -196,12 +205,8 @@ export default function TabelPenguapan({ reload }: TabelPenguapanProps) {
       } else {
         await fetchAllData();
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error("Gagal memperbarui data: " + error.message);
-      } else {
-        toast.error("Gagal memperbarui data: " + String(error));
-      }
+    } catch {
+      toast.error("Gagal memperbarui data");
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function tambahDataHariHujan(
   user_id: string,
-  rainy_day: string,
+  rainy_day: number,
   date: string
 ) {
   try {

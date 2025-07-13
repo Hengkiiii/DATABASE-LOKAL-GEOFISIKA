@@ -20,7 +20,7 @@ import autoTable from "jspdf-autotable";
 interface TabelHariHujan {
   id: number;
   date: string;
-  rainyDay: string;
+  rainyDay: number;
 }
 interface TabelHariHujanProps {
   reload?: boolean;
@@ -28,7 +28,7 @@ interface TabelHariHujanProps {
 interface RainyDayAPIResponse {
   id: number;
   date: string;
-  rainy_day: string;
+  rainy_day: number;
 }
 
 export default function TableHariHujan({ reload }: TabelHariHujanProps) {

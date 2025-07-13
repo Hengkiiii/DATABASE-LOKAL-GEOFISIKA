@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useMedia } from "react-use";
 import Card from "@/components/common/Card";
 import CardStatistik from "@/components/common/CardStatistikGempa";
@@ -7,6 +8,14 @@ import ChartJumlahGempa from "@/components/common/ChartJumlahGempa";
 
 export default function Dashboard() {
   const isDarkMode = useMedia("(prefers-color-scheme: dark)", false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      router.replace("/login");
+    }
+  }, [router]);
 
   return (
     <div

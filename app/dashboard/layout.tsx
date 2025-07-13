@@ -20,7 +20,9 @@ export default function LayoutDashboard({
           isDarkMode ? "bg-[#18171F]" : "bg-[#f5f5f7]"
         }`}
       >
-        <Sidebar />
+        <div className="h-screen sticky top-0 z-50">
+          <Sidebar />
+        </div>
         <div className="flex-1 flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-1 overflow-y-auto scroll-custom">

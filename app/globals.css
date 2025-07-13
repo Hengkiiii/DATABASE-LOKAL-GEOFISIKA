@@ -170,3 +170,8 @@
 .custom-icon {
   z-index: 1000;
 }
+/* Buat marker tetap konstan ukurannya */
+.marker-constant-size {
+  transform: translate(-50%, -50%) scale(1) !important;
+  will-change: transform;
+}
