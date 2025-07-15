@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   Polygon,
-  useMap,
   Tooltip,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import * as L from "leaflet";
+import { Download } from "lucide-react";
 import { FiAlertTriangle } from "react-icons/fi";
 import ReactDOMServer from "react-dom/server";
 
@@ -67,39 +67,36 @@ const getMarkerIcon = (tdom: string) =>
     ),
     iconSize: [24, 24],
     iconAnchor: [12, 12],
-    className: "custom-icon",
+    className: "custom-icon border-none",
   });
 
 const Legend = () => {
-  const map = useMap();
-
-  useEffect(() => {
-    const controlFn = L.control as unknown as (
-      options?: L.ControlOptions
-    ) => L.Control;
-    const legend = controlFn({ position: "bottomleft" });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    legend.onAdd = (_: L.Map): HTMLElement => {
-      const div = L.DomUtil.create("div", "info legend");
-      div.innerHTML = `
-        <div style="background: white; padding: 8px; border-radius: 8px; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2)">
-          <div style="margin-bottom: 6px"><strong>Legenda TDOM</strong></div>
-          <div><span style="background:#e63946;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> ≥ 5.0 Risiko Tinggi</div>
-          <div><span style="background:#f4a261;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> 2.5 - 4.9 Risiko Sedang</div>
-          <div><span style="background:#2a9d8f;width:12px;height:12px;display:inline-block;margin-right:6px;border-radius:2px;"></span> &lt; 2.5 Risiko Rendah</div>
-        </div>
-      `;
-      return div;
-    };
-
-    legend.addTo(map);
-
-    return () => {
-      legend.remove();
-    };
-  }, [map]);
-
-  return null;
+  return (
+    <div className="absolute bottom-11 left-10 z-[1001] bg-white p-3 rounded-lg shadow text-sm ">
+      <div className="font-semibold">Legenda TDOM</div>
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block w-3 h-3 rounded-sm"
+          style={{ background: "#e63946" }}
+        ></span>
+        ≥ 5.0 Risiko Tinggi
+      </div>
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block w-3 h-3 rounded-sm"
+          style={{ background: "#f4a261" }}
+        ></span>
+        2.5 - 4.9 Risiko Sedang
+      </div>
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block w-3 h-3 rounded-sm"
+          style={{ background: "#2a9d8f" }}
+        ></span>
+        &lt; 2.5 Risiko Rendah
+      </div>
+    </div>
+  );
 };
 
 export default function PetaRawanGempa() {
@@ -107,6 +104,7 @@ export default function PetaRawanGempa() {
     []
   );
   const [loading, setLoading] = useState(true);
+  const mapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const storedData = sessionStorage.getItem("filteredMicrothermorData");
@@ -138,101 +136,132 @@ export default function PetaRawanGempa() {
     setLoading(false);
   }, []);
 
+  const handleDownload = async () => {
+    if (typeof window === "undefined") return;
+    if (mapRef.current === null) return;
+    const domModule = await import("dom-to-image-more");
+    const domtoimage = domModule.default;
+    domtoimage
+      .toPng(mapRef.current)
+      .then((dataUrl: string) => {
+        const link = document.createElement("a");
+        link.download = "map-gempa.png";
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((error: Error) => {
+        console.error("❌ Error generating image:", error);
+      });
+  };
+
   return (
     <div className="w-full h-[calc(100vh-120px)] mt-4 px-4">
-      <MapContainer
-        center={[-3.9, 102.4]}
-        zoom={8}
-        scrollWheelZoom={true}
-        className="w-full h-full rounded-lg shadow-lg"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-        />
+      <div ref={mapRef} className="w-full h-full rounded-lg shadow-lg">
+        <MapContainer
+          center={[-3.9, 102.4]}
+          zoom={8}
+          scrollWheelZoom={true}
+          zoomControl={false}
+          className="w-full h-full rounded-lg shadow-lg"
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+          />
 
+          {!loading &&
+            microthermorData.map((data) => {
+              const lat = parseFloat(data.lat);
+              const lng = parseFloat(data.long);
+
+              if (isNaN(lat) || isNaN(lng) || isNaN(parseFloat(data.Tdom)))
+                return null;
+
+              const buffer = 0.01;
+              const polygonCoords: L.LatLngExpression[] = [
+                [lat - buffer, lng - buffer],
+                [lat - buffer, lng + buffer],
+                [lat + buffer, lng + buffer],
+                [lat + buffer, lng - buffer],
+                [lat - buffer, lng - buffer],
+              ];
+
+              const risiko =
+                parseFloat(data.Tdom) >= 5
+                  ? "Tinggi"
+                  : parseFloat(data.Tdom) >= 2.5
+                  ? "Sedang"
+                  : "Rendah";
+
+              return (
+                <React.Fragment key={`point-${data.id}`}>
+                  <Polygon
+                    positions={polygonCoords}
+                    pathOptions={{
+                      color: getColorByTdom(data.Tdom),
+                      fillColor: getColorByTdom(data.Tdom),
+                      fillOpacity: 0.5,
+                    }}
+                  >
+                    <Popup>
+                      <div className="space-y-1">
+                        <h3 className="font-bold">Zona Microthermor</h3>
+                        <p>
+                          <strong>Lokasi:</strong> {lat}, {lng}
+                        </p>
+                        <p>
+                          <strong>Fo:</strong> {data.Fo} Hz
+                        </p>
+                        <p>
+                          <strong>Ao:</strong> {data.Ao} mm/s
+                        </p>
+                        <p>
+                          <strong>Tdom:</strong> {data.Tdom} s
+                        </p>
+                        <p>
+                          <strong>Kg:</strong> {data.Kg}
+                        </p>
+                      </div>
+                    </Popup>
+                  </Polygon>
+
+                  <Marker
+                    position={[lat, lng]}
+                    icon={getMarkerIcon(data.Tdom)}
+                    zIndexOffset={1000}
+                  >
+                    <Popup>
+                      <div className="space-y-1">
+                        <h3 className="font-bold">Data Microthermor</h3>
+                        <p>
+                          <strong>TDOM:</strong> {data.Tdom} s
+                        </p>
+                        <p>
+                          <strong>Risiko:</strong> {risiko}
+                        </p>
+                      </div>
+                    </Popup>
+                    <Tooltip direction="top" offset={[0, -10]} permanent>
+                      Risiko: {risiko}
+                    </Tooltip>
+                  </Marker>
+                </React.Fragment>
+              );
+            })}
+        </MapContainer>
+      </div>
+      <div className="relative mt-4">
         <Legend />
-
-        {!loading &&
-          microthermorData.map((data) => {
-            const lat = parseFloat(data.lat);
-            const lng = parseFloat(data.long);
-
-            if (isNaN(lat) || isNaN(lng) || isNaN(parseFloat(data.Tdom)))
-              return null;
-
-            const buffer = 0.01;
-            const polygonCoords: L.LatLngExpression[] = [
-              [lat - buffer, lng - buffer],
-              [lat - buffer, lng + buffer],
-              [lat + buffer, lng + buffer],
-              [lat + buffer, lng - buffer],
-              [lat - buffer, lng - buffer],
-            ];
-
-            const risiko =
-              parseFloat(data.Tdom) >= 5
-                ? "Tinggi"
-                : parseFloat(data.Tdom) >= 2.5
-                ? "Sedang"
-                : "Rendah";
-
-            return (
-              <React.Fragment key={`point-${data.id}`}>
-                <Polygon
-                  positions={polygonCoords}
-                  pathOptions={{
-                    color: getColorByTdom(data.Tdom),
-                    fillColor: getColorByTdom(data.Tdom),
-                    fillOpacity: 0.5,
-                  }}
-                >
-                  <Popup>
-                    <div className="space-y-1">
-                      <h3 className="font-bold">Zona Microthermor</h3>
-                      <p>
-                        <strong>Lokasi:</strong> {lat}, {lng}
-                      </p>
-                      <p>
-                        <strong>Fo:</strong> {data.Fo} Hz
-                      </p>
-                      <p>
-                        <strong>Ao:</strong> {data.Ao} mm/s
-                      </p>
-                      <p>
-                        <strong>Tdom:</strong> {data.Tdom} s
-                      </p>
-                      <p>
-                        <strong>Kg:</strong> {data.Kg}
-                      </p>
-                    </div>
-                  </Popup>
-                </Polygon>
-
-                <Marker
-                  position={[lat, lng]}
-                  icon={getMarkerIcon(data.Tdom)}
-                  zIndexOffset={1000}
-                >
-                  <Popup>
-                    <div className="space-y-1">
-                      <h3 className="font-bold">Data Microthermor</h3>
-                      <p>
-                        <strong>TDOM:</strong> {data.Tdom} s
-                      </p>
-                      <p>
-                        <strong>Risiko:</strong> {risiko}
-                      </p>
-                    </div>
-                  </Popup>
-                  <Tooltip direction="top" offset={[0, -10]} permanent>
-                    Risiko: {risiko}
-                  </Tooltip>
-                </Marker>
-              </React.Fragment>
-            );
-          })}
-      </MapContainer>
+      </div>
+      {/* Tombol Download */}
+      <div className="absolute bottom-11 right-11 z-[1001] border-none">
+        <button
+          onClick={handleDownload}
+          className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition"
+        >
+          <Download className="w-6 h-6 text-green-600" />
+        </button>
+      </div>
     </div>
   );
 }

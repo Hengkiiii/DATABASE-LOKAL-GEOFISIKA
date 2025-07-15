@@ -14,6 +14,8 @@ import { updateEarthquake } from "@/lib/api/earthquake/earthquake-update/router"
 import { getDataGempaByDate } from "@/lib/api/earthquake/earthquake-get-by-all-data/router";
 import { toast } from "react-toastify";
 import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
+import { getImageBase64 } from "@/constants/imageToBase64";
 import autoTable from "jspdf-autotable";
 
 interface GempaData {
@@ -67,6 +69,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
   const [selectedData, setSelectedData] = useState<GempaData | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<GempaData | null>(null);
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   const fetchAllData = async () => {
     try {
@@ -120,6 +123,8 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
             "VIII",
             "IX",
             "X",
+            "XI",
+            "XII",
           ];
           if (
             (mmiMin && !validMMI.includes(mmiMin.toUpperCase())) ||
@@ -180,28 +185,61 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
     currentPage * itemsPerPage
   );
 
-  const generatePDF = () => {
+  const generatePDF = async (
+    gempaData: GempaData[],
+    startDate?: string,
+    endDate?: string
+  ) => {
     const doc = new jsPDF({
       orientation: "landscape",
       unit: "mm",
       format: "a4",
     });
+
+    const logoBase64 = await getImageBase64("/LogoBMKG.png");
+    doc.addImage(logoBase64, "PNG", 15, 10, 40, 25);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Laporan Data Gempa", 148.5, 15, { align: "center" });
+    doc.setFontSize(14);
+    doc.text("BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA", 148.5, 15, {
+      align: "center",
+    });
+    doc.setFontSize(13);
+    doc.text("STASIUN GEOFISIKA KLAS III KEPAHIANG BENGKULU", 148.5, 22, {
+      align: "center",
+    });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      "Jl. Pembangunan No. 156 Pasar Ujung Kepahiang - Bengkulu Telp: (0732)391267",
+      148.5,
+      28,
+      { align: "center" }
+    );
+    doc.text(
+      "Fax: (0732)391600 / (0732)391578  Kode Pos 39172  E-Mail : stageof.kepahiang@bmkg.go.id",
+      148.5,
+      33,
+      { align: "center" }
+    );
+    doc.setLineWidth(0.5);
+    doc.line(15, 36, 282, 36);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Laporan Data Gempa", 148.5, 45, { align: "center" });
     if (startDate && endDate) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(`Periode: ${startDate} hingga ${endDate}`, 148.5, 25, {
+      doc.text(`Periode: ${startDate} hingga ${endDate}`, 148.5, 52, {
         align: "center",
       });
     }
-    const currentDate = new Date().toLocaleDateString();
+
+    const currentDate = new Date().toLocaleDateString("id-ID");
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
-    doc.text(`Dicetak pada: ${currentDate}`, 148.5, 30, {
-      align: "center",
-    });
+    doc.text(`Dicetak pada: ${currentDate}`, 148.5, 58, { align: "center" });
+
+    // Data Tabel
     const tableData = gempaData.map((item, index) => [
       index + 1,
       new Date(item.dateTime).toLocaleString("id-ID"),
@@ -213,6 +251,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       item.keterangan || "-",
       item.observer || "-",
     ]);
+
     autoTable(doc, {
       head: [
         [
@@ -228,7 +267,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
         ],
       ],
       body: tableData,
-      startY: 40,
+      startY: 65,
       margin: { left: 15, right: 15 },
       styles: {
         fontSize: 9,
@@ -266,11 +305,37 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       },
     });
 
+    // Nama file
     const fileName =
       startDate && endDate
         ? `Laporan_Data_Gempa_${startDate}_${endDate}.pdf`
         : "Laporan_Data_Gempa_Semua_Data.pdf";
+
     doc.save(fileName);
+  };
+  const exportToExcel = (data: GempaData[]) => {
+    const worksheetData = data.map((item, index) => ({
+      No: index + 1,
+      Tanggal: new Date(item.dateTime).toLocaleString("id-ID"),
+      Lintang: item.lintang,
+      Bujur: item.bujur,
+      "Kedalaman (km)": item.kedalaman,
+      Magnitudo: item.magnitudo,
+      MMI: item.mmi || "-",
+      Keterangan: item.keterangan,
+      Observer: item.observer,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Gempa");
+
+    const fileName =
+      startDate && endDate
+        ? `Laporan_Data_Gempa_${startDate}_${endDate}.xlsx`
+        : "Laporan_Data_Gempa_Semua_Data.xlsx";
+
+    XLSX.writeFile(workbook, fileName);
   };
 
   const handleEditClick = async (data: GempaData) => {
@@ -358,8 +423,30 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
             <Button
               icon={<Printer />}
               buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
-              onClick={generatePDF}
+              onClick={() => setShowExportOptions((prev) => !prev)}
             />
+            {showExportOptions && (
+              <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg w-40 z-50">
+                <button
+                  onClick={() => {
+                    generatePDF(gempaData, startDate, endDate);
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-t-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download PDF
+                </button>
+                <button
+                  onClick={() => {
+                    exportToExcel(gempaData);
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-b-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download Excel
+                </button>
+              </div>
+            )}
             <Button
               icon={<Funnel size={18} />}
               onClick={() => setShowFilter((prev) => !prev)}

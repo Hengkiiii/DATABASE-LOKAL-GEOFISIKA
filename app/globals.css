@@ -28,7 +28,6 @@
     opacity: 0;
   }
 }
-
 .pulse-animate {
   animation: pulse 1.2s ease-out infinite;
   transform-origin: center;
@@ -38,13 +37,12 @@
 .marker-custom {
   position: relative;
   display: inline-block;
-}
-
-.pulse-ring {
-  position: absolute;
-  border-radius: 9999px;
-  opacity: 0.8;
-  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.4));
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  /* Tambahkan ini */
+  background-image: none !important;
 }
 
 .marker-core {
@@ -54,6 +52,21 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  background-clip: padding-box;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  /* Tambahkan ini */
+  background-image: none !important;
+}
+.marker-ring,
+.marker-star-container,
+.marker-box-container {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
 }
 
 /* === Warna berdasarkan kedalaman === */
@@ -74,9 +87,16 @@
 }
 
 /* ==== Marker Bintang ==== */
+.marker-star-container,
+.marker-box-container {
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
 .marker-star {
   background: gold;
-  border: 2px solid black;
+  border: none !important;
   border-radius: 50%;
   font-weight: bold;
   font-size: 1em;
@@ -85,12 +105,12 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  box-shadow: none !important;
+  outline: none !important;
 }
-
-/* ==== Marker Kotak ==== */
 .marker-box {
   background-color: gray;
-  border: 2px solid black;
+  border: none !important;
   font-weight: bold;
   font-size: 1em;
   color: white;
@@ -98,6 +118,13 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.marker-ring {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* ==== Kompas Button ==== */
@@ -153,24 +180,22 @@
   border: none !important;
 }
 .leaflet-tile-container img {
-  image-rendering: pixelated;
+  image-rendering: auto !important; /* Ganti dari pixelated agar tile halus */
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
+/* ==== Umum ==== */
 .custom-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
+  z-index: 1000;
 }
 .leaflet-container {
   z-index: 0;
 }
-.custom-icon {
-  z-index: 1000;
-}
-/* Buat marker tetap konstan ukurannya */
 .marker-constant-size {
   transform: translate(-50%, -50%) scale(1) !important;
   will-change: transform;

@@ -238,13 +238,11 @@ export default function TabelSeismisitas() {
           <Button
             icon={<Printer />}
             buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
-            title="Cetak Data"
           />
           <Button
             icon={<Funnel size={18} />}
             onClick={() => setShowFilter((prev) => !prev)}
             buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
-            title="Filter Data"
           />
           {showFilter && (
             <div

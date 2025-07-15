@@ -15,6 +15,8 @@ import { updateRainyDay } from "@/lib/api/rainy-days/rainy-days-update/router";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
+import { getImageBase64 } from "@/constants/imageToBase64";
 import autoTable from "jspdf-autotable";
 
 interface TabelHariHujan {
@@ -44,6 +46,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
   const [selectedData, setSelectedData] = useState<TabelHariHujan | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<TabelHariHujan | null>(null);
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -105,52 +108,80 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const generatePDF = () => {
-    const doc = new jsPDF();
+  const generatePDF = async () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const logoBase64 = await getImageBase64("/LogoBMKG.png");
+    doc.addImage(logoBase64, "PNG", 0, 10, 40, 25);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Laporan Data Hari Hujan", 105, 15, { align: "center" });
+    doc.setFontSize(14);
+    doc.text("BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA", 105, 16, {
+      align: "center",
+    });
+
+    doc.setFontSize(13);
+    doc.text("STASIUN GEOFISIKA KLAS III KEPAHIANG BENGKULU", 105, 23, {
+      align: "center",
+    });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      "Jl. Pembangunan No. 156 Pasar Ujung Kepahiang - Bengkulu  Telp: (0732)391267",
+      105,
+      29,
+      { align: "center" }
+    );
+    doc.text(
+      "Fax: (0732)391600 / (0732)391578  Kode Pos 39172  E-Mail : stageof.kepahiang@bmkg.go.id",
+      105,
+      34,
+      { align: "center" }
+    );
+    doc.setLineWidth(0.8);
+    doc.line(0, 38, 220, 38);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Laporan Data Hari Hujan", 105, 48, { align: "center" });
     if (startDate && endDate) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(`Periode: ${startDate} hingga ${endDate}`, 105, 25, {
+      doc.text(`Periode: ${startDate} hingga ${endDate}`, 105, 55, {
         align: "center",
       });
     }
-    const currentDate = new Date().toLocaleDateString();
+    const currentDate = new Date().toLocaleDateString("id-ID");
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
-    doc.text(`Dicetak pada: ${currentDate}`, 105, 30, { align: "center" });
-
+    doc.text(`Dicetak pada: ${currentDate}`, 105, 61, { align: "center" });
     const tableData = dataHariHujan.map((item, index) => [
       index + 1,
       item.date,
       item.rainyDay,
     ]);
-
     autoTable(doc, {
       head: [["No.", "Tanggal", "Hari Hujan"]],
       body: tableData,
-      startY: 40,
-      margin: { left: 30, right: 30 },
+      startY: 68,
+      margin: { left: 15, right: 15 },
       styles: {
-        cellPadding: 4,
-        fontSize: 10,
+        cellPadding: 3,
+        fontSize: 9,
         valign: "middle",
         halign: "center",
+        font: "helvetica",
         lineColor: [0, 0, 0],
         lineWidth: 0.3,
-        font: "helvetica",
-        fontStyle: "normal",
       },
       headStyles: {
         fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
         fontStyle: "bold",
-        fontSize: 11,
-        lineColor: [0, 0, 0],
-        lineWidth: 0.5,
-        font: "helvetica",
+        fontSize: 10,
       },
       bodyStyles: {
         fillColor: [255, 255, 255],
@@ -159,15 +190,33 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       alternateRowStyles: {
         fillColor: [250, 250, 250],
       },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.3,
     });
 
     const fileName =
       startDate && endDate
         ? `Laporan_Hari_Hujan_${startDate}_${endDate}.pdf`
         : "Laporan_Hari_Hujan_Semua_Data.pdf";
+
     doc.save(fileName);
+  };
+
+  const exportToExcel = () => {
+    const worksheetData = dataHariHujan.map((item, index) => ({
+      No: index + 1,
+      Tanggal: item.date,
+      "Hari Hujan": item.rainyDay,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Hari Hujan");
+
+    const fileName =
+      startDate && endDate
+        ? `Laporan_Hari_Hujan_${startDate}_${endDate}.xlsx`
+        : "Laporan_Hari_Hujan_Semua_Data.xlsx";
+
+    XLSX.writeFile(workbook, fileName);
   };
 
   const handleEditClick = async (id: string) => {
@@ -250,9 +299,31 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
           <div className="relative flex gap-2">
             <Button
               icon={<Printer />}
-              onClick={generatePDF}
-              buttonStyle="px-4 py-2 rounded-xl font-medium shadow-md hover:scale-105 transition cursor-pointer bg-gray-100 text-gray-700"
+              buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
+              onClick={() => setShowExportOptions((prev) => !prev)}
             />
+            {showExportOptions && (
+              <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg w-40 z-50">
+                <button
+                  onClick={() => {
+                    generatePDF();
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-t-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download PDF
+                </button>
+                <button
+                  onClick={() => {
+                    exportToExcel();
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-b-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download Excel
+                </button>
+              </div>
+            )}
             <Button
               icon={<Funnel size={18} />}
               onClick={() => setShowFilter((prev) => !prev)}

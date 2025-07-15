@@ -137,7 +137,7 @@ export default function Page() {
           <span class="marker-core ${depthClass}" style="width: ${size}px; height: ${size}px;"></span>
         </div>
       `,
-      className: "",
+      className: "border-none",
       iconSize: [size, size],
       iconAnchor: [size / 2, size / 2],
     });
@@ -146,12 +146,12 @@ export default function Page() {
   function createStarIcon(size: number): L.DivIcon {
     return L.divIcon({
       html: `
-        <div class="marker-star-container" style="width: ${size}px; height: ${size}px;">
+        <div class="marker-star-container border-none" style="width: ${size}px; height: ${size}px;">
           <span class="marker-ring" style="width: ${size}px; height: ${size}px;"></span>
           <div class="marker-star pulse-animate" style="width: ${size}px; height: ${size}px;">★</div>
         </div>
       `,
-      className: "",
+      className: "border-none",
       iconSize: [size, size],
       iconAnchor: [size / 2, size / 2],
     });
@@ -165,7 +165,7 @@ export default function Page() {
           <div class="marker-box pulse-animate" style="width: ${size}px; height: ${size}px;">■</div>
         </div>
       `,
-      className: "",
+      className: "border-none",
       iconSize: [size, size],
       iconAnchor: [size / 2, size / 2],
     });
@@ -198,6 +198,7 @@ export default function Page() {
           center={[-3.8, 102.2655]}
           zoom={5}
           scrollWheelZoom={true}
+          zoomControl={false}
           className="w-full h-full"
         >
           <TileLayer
@@ -219,6 +220,8 @@ export default function Page() {
               "VIII",
               "IX",
               "X",
+              "XI",
+              "XII",
             ];
 
             let icon;
