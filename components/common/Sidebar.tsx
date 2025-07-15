@@ -274,7 +274,7 @@ export default function Sidebar() {
           {/* Dropdown untuk Peta */}
           <SubSidebarItem
             index={5}
-            label="Peta sensitivitas"
+            label="Peta seismisitas"
             collapsed={collapsed}
             route="/dashboard/geofisika/peta"
             icon={<span className="w-2 h-2" />}
