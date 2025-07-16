@@ -13,7 +13,7 @@ export async function tambahDataGempa(
 ) {
   try {
     const response = await fetch(
-      `${API_BASE_URL}earthquake/insert?user_id=${encodeURIComponent(user_id)}`,
+      `${API_BASE_URL}earthquake/insert?user_id=${user_id}`,
       {
         method: "POST",
         headers: {
@@ -31,8 +31,20 @@ export async function tambahDataGempa(
         }),
       }
     );
+    console.log({
+      user_id,
+      date_time: date_time,
+      mmi,
+      description: description,
+      depth: Number(depth),
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      magnitude: Number(magnitude),
+      observer_name: observer_name,
+    });
 
     const data = await response.json();
+    console.log("Server response:", data);
 
     if (!response.ok) {
       throw new Error(data.message || "Gagal menambahkan data gempa");

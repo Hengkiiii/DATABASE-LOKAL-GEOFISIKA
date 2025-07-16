@@ -93,7 +93,19 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       setLoading(false);
     }
   };
-
+  const formatTanggalWIB = (isoString: string) => {
+    return (
+      new Date(isoString).toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }) + " WIB"
+    );
+  };
   const handleFilter = async () => {
     try {
       setLoading(true);
@@ -130,7 +142,9 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
             (mmiMin && !validMMI.includes(mmiMin.toUpperCase())) ||
             (mmiMax && !validMMI.includes(mmiMax.toUpperCase()))
           ) {
-            toast.error("MMI harus menggunakan huruf Romawi antara I sampai X");
+            toast.error(
+              "MMI harus menggunakan huruf Romawi antara I sampai XII"
+            );
             return;
           }
         }
@@ -226,10 +240,22 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text("Laporan Data Gempa", 148.5, 45, { align: "center" });
+
     if (startDate && endDate) {
+      const formatTanggal = (tanggal: string) => {
+        const date = new Date(tanggal);
+        const dd = String(date.getDate()).padStart(2, "0");
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const yyyy = date.getFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+      };
+
+      const formattedStart = formatTanggal(startDate);
+      const formattedEnd = formatTanggal(endDate);
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(`Periode: ${startDate} hingga ${endDate}`, 148.5, 52, {
+      doc.text(`Periode: ${formattedStart} hingga ${formattedEnd}`, 148.5, 52, {
         align: "center",
       });
     }
@@ -239,10 +265,9 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
     doc.setFontSize(10);
     doc.text(`Dicetak pada: ${currentDate}`, 148.5, 58, { align: "center" });
 
-    // Data Tabel
     const tableData = gempaData.map((item, index) => [
       index + 1,
-      new Date(item.dateTime).toLocaleString("id-ID"),
+      formatTanggalWIB(item.dateTime),
       item.lintang || "-",
       item.bujur || "-",
       item.kedalaman?.toString() || "-",
@@ -305,7 +330,6 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       },
     });
 
-    // Nama file
     const fileName =
       startDate && endDate
         ? `Laporan_Data_Gempa_${startDate}_${endDate}.pdf`
@@ -313,6 +337,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
 
     doc.save(fileName);
   };
+
   const exportToExcel = (data: GempaData[]) => {
     const worksheetData = data.map((item, index) => ({
       No: index + 1,
@@ -588,7 +613,9 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
                     <td className="py-3 px-5">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="py-3 px-5">{item.dateTime}</td>
+                    <td className="py-3 px-5">
+                      {formatTanggalWIB(item.dateTime)}
+                    </td>
                     <td className="py-3 px-5">{item.lintang}</td>
                     <td className="py-3 px-5">{item.bujur}</td>
                     <td className="py-3 px-5">{item.kedalaman}</td>

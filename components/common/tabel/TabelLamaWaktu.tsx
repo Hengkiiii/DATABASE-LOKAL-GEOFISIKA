@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Pencil, Trash2, Download, Funnel, Printer } from "lucide-react";
 import Button from "@/components/common/Button";
 import Card from "@/components/common/Card";
+import InputField from "@/components/common/InputField";
 import { MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
 import ModalEditTandaWaktu from "@/components/common/modalEdit/ModalEditLamaWaktu";
 import ModalHapusTandaWaktu from "@/components/common/modalHapus/ModalHapusTandaWaktu";
@@ -79,11 +80,10 @@ export default function TableTandaWaktu({ reload }: TableTandaWaktuProps) {
         tanggal: item.date,
         file_base64: item.file_base64,
       }));
-      console.log("Data mapped:", mapped);
       setDataLamaWaktu(mapped);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Gagal filter data:", error);
+      sessionStorage.setItem("timeSignatureData", JSON.stringify(mapped));
+      setShowFilter(false);
+    } catch {
       toast.error("Gagal memfilter data berdasarkan tanggal");
     } finally {
       setLoading(false);
@@ -198,40 +198,44 @@ export default function TableTandaWaktu({ reload }: TableTandaWaktuProps) {
               icon={<Printer />}
               buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
             />
-            <button
+            <Button
+              icon={<Funnel size={18} />}
               onClick={() => setShowFilter((prev) => !prev)}
-              className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
-              title="Filter Tanggal"
-            >
-              <Funnel size={18} />
-            </button>
+              buttonStyle="px-4 py-2 rounded-xl font-medium shadow-md hover:scale-105 transition cursor-pointer bg-gray-100 text-gray-700"
+            />
             {showFilter && (
               <div
                 ref={filterRef}
-                className="absolute right-0 top-12 z-50 bg-white border rounded-lg shadow-lg p-4 w-64 space-y-3"
+                className="absolute right-0 top-12 z-50 border border-gray-200 rounded-lg shadow-lg p-4 w-64 bg-white space-y-3"
               >
-                <div className="flex flex-col text-sm">
-                  <label className="text-gray-600">Dari Tanggal:</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => {
-                      setStartDate(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="px-3 py-2 border rounded"
+                <InputField
+                  label="Dari Tanggal:"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <InputField
+                  label="Sampai Tanggal:"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+                <div className="flex justify-between gap-2 pt-2">
+                  <Button
+                    title="Terapkan"
+                    onClick={handleFilter}
+                    buttonStyle="flex-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
                   />
-                </div>
-                <div className="flex flex-col text-sm">
-                  <label className="text-gray-600">Sampai Tanggal:</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => {
-                      setEndDate(e.target.value);
-                      setCurrentPage(1);
+                  <Button
+                    title="Reset"
+                    onClick={() => {
+                      setStartDate("");
+                      setEndDate("");
+                      sessionStorage.removeItem("timeSignatureData");
+                      fetchAllData();
+                      setShowFilter(false);
                     }}
-                    className="px-3 py-2 border rounded"
+                    buttonStyle="flex-1 px-3 py-2 text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 rounded-lg shadow"
                   />
                 </div>
               </div>
