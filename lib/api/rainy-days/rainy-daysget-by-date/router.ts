@@ -1,8 +1,8 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-interface RainyDay {
+interface RainyDayData {
   id: number;
-  rainyDay: string;
+  rainy_day: string;
   date: string;
 }
 export async function getRainyDaysByDate(startDate: string, endDate: string) {
@@ -31,9 +31,9 @@ export async function getRainyDaysByDate(startDate: string, endDate: string) {
 
     const data = result.data;
 
-    return data.map((item: RainyDay) => ({
+    return data.map((item: RainyDayData) => ({
       id: item.id,
-      rainyDay: item.rainyDay,
+      rainy_day: item.rainy_day,
       date: item.date,
     }));
   } catch (error) {

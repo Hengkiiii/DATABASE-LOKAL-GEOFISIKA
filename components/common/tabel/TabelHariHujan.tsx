@@ -22,7 +22,7 @@ import autoTable from "jspdf-autotable";
 interface TabelHariHujan {
   id: number;
   date: string;
-  rainyDay: number;
+  rainyDay: string;
 }
 interface TabelHariHujanProps {
   reload?: boolean;
@@ -30,7 +30,7 @@ interface TabelHariHujanProps {
 interface RainyDayAPIResponse {
   id: number;
   date: string;
-  rainy_day: number;
+  rainy_day: string;
 }
 
 export default function TableHariHujan({ reload }: TabelHariHujanProps) {
@@ -77,6 +77,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
     try {
       setLoading(true);
       const data = await getRainyDaysByDate(startDate, endDate);
+      console.log("Filtered Data:", data);
       const mapped: TabelHariHujan[] = data.map(
         (item: RainyDayAPIResponse) => ({
           id: item.id,
@@ -150,9 +151,14 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
     if (startDate && endDate) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(`Periode: ${startDate} hingga ${endDate}`, 105, 55, {
-        align: "center",
-      });
+      doc.text(
+        `Periode: ${formatDate(startDate)} hingga ${formatDate(endDate)}`,
+        105,
+        55,
+        {
+          align: "center",
+        }
+      );
     }
     const currentDate = new Date().toLocaleDateString("id-ID");
     doc.setFont("helvetica", "italic");
@@ -160,7 +166,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
     doc.text(`Dicetak pada: ${currentDate}`, 105, 61, { align: "center" });
     const tableData = dataHariHujan.map((item, index) => [
       index + 1,
-      item.date,
+      formatDate(item.date),
       item.rainyDay,
     ]);
     autoTable(doc, {
@@ -290,6 +296,13 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       }
     }
   };
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   return (
     <>
@@ -396,7 +409,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
                     <td className="py-3 px-5">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="py-3 px-5">{item.date}</td>
+                    <td className="py-3 px-5">{formatDate(item.date)}</td>
                     <td className="py-3 px-5">{item.rainyDay}</td>
                     <td className="py-3 px-5">
                       <div className="flex justify-center gap-3">

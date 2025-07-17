@@ -15,7 +15,9 @@ import { getSunshineDurationByDate } from "@/lib/api/Sunshine-duration/sunshine-
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
 import autoTable from "jspdf-autotable";
+import { getImageBase64 } from "@/constants/imageToBase64";
 
 interface TabelLamaPenyinaran {
   id: number;
@@ -53,6 +55,7 @@ export default function TabelLamaPenyinaran({
   const [dataToDelete, setDataToDelete] = useState<TabelLamaPenyinaran | null>(
     null
   );
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -115,54 +118,92 @@ export default function TabelLamaPenyinaran({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const generatePDF = () => {
-    const doc = new jsPDF();
+  const generatePDF = async () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const logoBase64 = await getImageBase64("/LogoBMKG.png"); // Buat fungsi ini kalau belum ada
+    doc.addImage(logoBase64, "PNG", 0, 10, 40, 25);
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Laporan Data Lama Penyinaran Matahari", 105, 15, {
+    doc.setFontSize(14);
+    doc.text("BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA", 105, 16, {
       align: "center",
     });
+
+    doc.setFontSize(13);
+    doc.text("STASIUN GEOFISIKA KLAS III KEPAHIANG BENGKULU", 105, 23, {
+      align: "center",
+    });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      "Jl. Pembangunan No. 156 Pasar Ujung Kepahiang - Bengkulu  Telp: (0732)391267",
+      105,
+      29,
+      { align: "center" }
+    );
+    doc.text(
+      "Fax: (0732)391600 / (0732)391578  Kode Pos 39172  E-Mail : stageof.kepahiang@bmkg.go.id",
+      105,
+      34,
+      { align: "center" }
+    );
+
+    doc.setLineWidth(0.8);
+    doc.line(0, 38, 220, 38);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Laporan Data Lama Penyinaran Matahari", 105, 48, {
+      align: "center",
+    });
+
     if (startDate && endDate) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(`Periode: ${startDate} hingga ${endDate}`, 105, 25, {
-        align: "center",
-      });
+      doc.text(
+        `Periode: ${formatDate(startDate)} hingga ${formatDate(endDate)}`,
+        105,
+        55,
+        { align: "center" }
+      );
     }
-    const currentDate = new Date().toLocaleDateString();
+
+    const currentDate = new Date().toLocaleDateString("id-ID");
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
-    doc.text(`Dicetak pada: ${currentDate}`, 105, 30, { align: "center" });
+    doc.text(`Dicetak pada: ${currentDate}`, 105, 61, { align: "center" });
 
     const tableData = dataLamaPenyinaran.map((item, index) => [
       index + 1,
-      item.date,
+      formatDate(item.date),
       item.sunshine_duration,
     ]);
 
     autoTable(doc, {
-      head: [["No.", "Tanggal", "Lama Penyinaran Matahari"]],
+      head: [["No.", "Tanggal", "Lama Penyinaran (Jam)"]],
       body: tableData,
-      startY: 40,
-      margin: { left: 30, right: 30 },
+      startY: 68,
+      margin: { left: 15, right: 15 },
       styles: {
-        cellPadding: 4,
-        fontSize: 10,
+        cellPadding: 3,
+        fontSize: 9,
         valign: "middle",
         halign: "center",
+        font: "helvetica",
         lineColor: [0, 0, 0],
         lineWidth: 0.3,
-        font: "helvetica",
-        fontStyle: "normal",
       },
       headStyles: {
         fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
         fontStyle: "bold",
-        fontSize: 11,
-        lineColor: [0, 0, 0],
-        lineWidth: 0.5,
-        font: "helvetica",
+        fontSize: 10,
       },
       bodyStyles: {
         fillColor: [255, 255, 255],
@@ -171,16 +212,37 @@ export default function TabelLamaPenyinaran({
       alternateRowStyles: {
         fillColor: [250, 250, 250],
       },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.3,
     });
 
     const fileName =
       startDate && endDate
-        ? `Laporan_Data_Lama_Penyinaran_${startDate}_${endDate}.pdf`
-        : "Laporan_Data_Lama_Penyinaran_Semua_Data.pdf";
+        ? `Laporan_Lama_Penyinaran_${startDate}_${endDate}.pdf`
+        : "Laporan_Lama_Penyinaran_Semua_Data.pdf";
+
     doc.save(fileName);
   };
+  const exportToExcel = () => {
+    const wsData = [
+      ["No.", "Tanggal", "Lama Penyinaran (Jam)"],
+      ...dataLamaPenyinaran.map((item, index) => [
+        index + 1,
+        formatDate(item.date),
+        item.sunshine_duration,
+      ]),
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Lama Penyinaran");
+
+    const fileName =
+      startDate && endDate
+        ? `Laporan_Lama_Penyinaran_${startDate}_${endDate}.xlsx`
+        : "Laporan_Lama_Penyinaran_Semua_Data.xlsx";
+
+    XLSX.writeFile(workbook, fileName);
+  };
+
   const handleEditClick = async (id: number) => {
     try {
       const data = await getSunshineDuration(id);
@@ -259,6 +321,13 @@ export default function TabelLamaPenyinaran({
       setLoading(false);
     }
   };
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   return (
     <>
@@ -270,9 +339,31 @@ export default function TabelLamaPenyinaran({
           <div className="relative flex gap-2">
             <Button
               icon={<Printer />}
-              onClick={generatePDF}
-              buttonStyle="px-4 py-2 rounded-xl font-medium shadow-md hover:scale-105 transition cursor-pointer bg-gray-100 text-gray-700"
+              buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
+              onClick={() => setShowExportOptions((prev) => !prev)}
             />
+            {showExportOptions && (
+              <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg w-40 z-50">
+                <button
+                  onClick={() => {
+                    generatePDF();
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-t-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download PDF
+                </button>
+                <button
+                  onClick={() => {
+                    exportToExcel();
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-b-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download Excel
+                </button>
+              </div>
+            )}
             <Button
               icon={<Funnel size={18} />}
               onClick={() => setShowFilter((prev) => !prev)}
@@ -345,7 +436,7 @@ export default function TabelLamaPenyinaran({
                     <td className="py-3 px-5">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="py-3 px-5">{item.date}</td>
+                    <td className="py-3 px-5">{formatDate(item.date)}</td>
                     <td className="py-3 px-5 text-center">
                       {item.sunshine_duration} jam
                     </td>

@@ -86,7 +86,12 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
         keterangan: item.description,
         observer: item.observer_name,
       }));
-      setGempaData(items);
+      setGempaData(
+        items.sort(
+          (a, b) =>
+            new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+        )
+      );
     } catch {
       toast.error("Gagal mengambil data gempa");
     } finally {

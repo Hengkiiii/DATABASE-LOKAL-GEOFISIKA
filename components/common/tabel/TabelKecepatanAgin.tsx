@@ -13,7 +13,10 @@ import { getWindDirectionAndSpeed } from "@/lib/api/wind-direction-and-speed/win
 import { getWindDirectionAndSpeedByDate } from "@/lib/api/wind-direction-and-speed/wind-direction-and-speed-get-by-date/router";
 import { getAllDataAngin } from "@/lib/api/wind-direction-and-speed/wind-direction-and-speed-ge-all/router";
 import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
 import autoTable from "jspdf-autotable";
+import { getImageBase64 } from "@/constants/imageToBase64";
+
 interface TabelKecepatanAngin {
   id: number;
   tanggal: string;
@@ -54,6 +57,7 @@ export default function TabelKecepatanAngin({
   const [dataToDelete, setDataToDelete] = useState<TabelKecepatanAngin | null>(
     null
   );
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -122,29 +126,76 @@ export default function TabelKecepatanAngin({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const generatePDF = () => {
-    const doc = new jsPDF();
+  const generatePDF = async () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const logoBase64 = await getImageBase64("/LogoBMKG.png");
+    doc.addImage(logoBase64, "PNG", 0, 10, 40, 25);
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Laporan Data ", 105, 15, { align: "center" });
+    doc.setFontSize(14);
+    doc.text("BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA", 105, 16, {
+      align: "center",
+    });
+
+    doc.setFontSize(13);
+    doc.text("STASIUN GEOFISIKA KLAS III KEPAHIANG BENGKULU", 105, 23, {
+      align: "center",
+    });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      "Jl. Pembangunan No. 156 Pasar Ujung Kepahiang - Bengkulu  Telp: (0732)391267",
+      105,
+      29,
+      { align: "center" }
+    );
+    doc.text(
+      "Fax: (0732)391600 / (0732)391578  Kode Pos 39172  E-Mail : stageof.kepahiang@bmkg.go.id",
+      105,
+      34,
+      { align: "center" }
+    );
+    doc.setLineWidth(0.8);
+    doc.line(0, 38, 220, 38);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Laporan Data Arah dan Kecepatan Angin", 105, 48, {
+      align: "center",
+    });
+
     if (startDate && endDate) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(`Periode: ${startDate} hingga ${endDate}`, 105, 25, {
-        align: "center",
-      });
+      doc.text(
+        `Periode: ${formatDate(startDate)} hingga ${formatDate(endDate)}`,
+        105,
+        55,
+        { align: "center" }
+      );
     }
-    const currentDate = new Date().toLocaleDateString();
+
+    const currentDate = new Date().toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
-    doc.text(`Dicetak pada: ${currentDate}`, 105, 30, { align: "center" });
+    doc.text(`Dicetak pada: ${currentDate}`, 105, 61, { align: "center" });
 
     const tableData = windData.map((item, index) => [
       index + 1,
-      item.tanggal,
-      item.kecepatan ? `${item.kecepatan} km/h` : "-",
+      formatDate(item.tanggal),
+      `${item.kecepatan} km/h`,
       item.arahTerbanyak || "-",
-      item.kecepatanTerbesar ? `${item.kecepatanTerbesar} km/h` : "-",
+      `${item.kecepatanTerbesar} km/h`,
       item.arah || "-",
     ]);
 
@@ -160,26 +211,22 @@ export default function TabelKecepatanAngin({
         ],
       ],
       body: tableData,
-      startY: 40,
-      margin: { left: 30, right: 30 },
+      startY: 68,
+      margin: { left: 15, right: 15 },
       styles: {
-        cellPadding: 4,
-        fontSize: 10,
+        cellPadding: 3,
+        fontSize: 9,
         valign: "middle",
         halign: "center",
+        font: "helvetica",
         lineColor: [0, 0, 0],
         lineWidth: 0.3,
-        font: "helvetica",
-        fontStyle: "normal",
       },
       headStyles: {
         fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
         fontStyle: "bold",
-        fontSize: 11,
-        lineColor: [0, 0, 0],
-        lineWidth: 0.5,
-        font: "helvetica",
+        fontSize: 10,
       },
       bodyStyles: {
         fillColor: [255, 255, 255],
@@ -188,14 +235,12 @@ export default function TabelKecepatanAngin({
       alternateRowStyles: {
         fillColor: [250, 250, 250],
       },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.3,
     });
 
     const fileName =
       startDate && endDate
-        ? `Laporan_Data_Kecepatan_Angin_${startDate}_${endDate}.pdf`
-        : "Laporan_Data_Kecepatan_Angin_Semua_Data.pdf";
+        ? `Laporan_Angin_${startDate}_${endDate}.pdf`
+        : "Laporan_Angin_Semua_Data.pdf";
     doc.save(fileName);
   };
 
@@ -215,6 +260,27 @@ export default function TabelKecepatanAngin({
     } catch {
       toast.error("Gagal memuat data untuk diedit");
     }
+  };
+  const exportToExcel = () => {
+    const worksheetData = windData.map((item, index) => ({
+      No: index + 1,
+      Tanggal: formatDate(item.tanggal),
+      "Kecepatan (km/h)": item.kecepatan,
+      "Arah Terbanyak": item.arahTerbanyak,
+      "Kecepatan Terbesar (km/h)": item.kecepatanTerbesar,
+      Arah: item.arah,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Angin");
+
+    const fileName =
+      startDate && endDate
+        ? `Laporan_Angin_${startDate}_${endDate}.xlsx`
+        : "Laporan_Angin_Semua_Data.xlsx";
+
+    XLSX.writeFile(workbook, fileName);
   };
 
   const handleSaveEdit = async () => {
@@ -269,6 +335,13 @@ export default function TabelKecepatanAngin({
       setLoading(false);
     }
   };
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   return (
     <>
@@ -280,9 +353,31 @@ export default function TabelKecepatanAngin({
           <div className="relative flex gap-2">
             <Button
               icon={<Printer />}
-              onClick={generatePDF}
-              buttonStyle="px-4 py-2 rounded-xl font-medium shadow-md hover:scale-105 transition cursor-pointer bg-gray-100 text-gray-700"
+              buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
+              onClick={() => setShowExportOptions((prev) => !prev)}
             />
+            {showExportOptions && (
+              <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg w-40 z-50">
+                <button
+                  onClick={() => {
+                    generatePDF();
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-t-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download PDF
+                </button>
+                <button
+                  onClick={() => {
+                    exportToExcel();
+                    setShowExportOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-b-lg cursor-pointer hover:bg-gray-100"
+                >
+                  Download Excel
+                </button>
+              </div>
+            )}
             <Button
               icon={<Funnel size={18} />}
               onClick={() => setShowFilter((prev) => !prev)}
@@ -360,7 +455,7 @@ export default function TabelKecepatanAngin({
                     <td className="py-3 px-5">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="py-3 px-5">{item.tanggal}</td>
+                    <td className="py-3 px-5">{formatDate(item.tanggal)}</td>
                     <td className="py-3 px-5 text-center">
                       {item.kecepatan} km/h
                     </td>

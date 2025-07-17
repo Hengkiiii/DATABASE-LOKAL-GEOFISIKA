@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Pencil, Trash2, Download, Funnel, Printer } from "lucide-react";
+import { Pencil, Trash2, Download, Funnel } from "lucide-react";
 import Button from "@/components/common/Button";
 import Card from "@/components/common/Card";
 import InputField from "@/components/common/InputField";
@@ -194,10 +194,6 @@ export default function TableTandaWaktu({ reload }: TableTandaWaktuProps) {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Data Tanda Waktu</h2>
           <div className="flex flex-wrap gap-2 relative">
-            <Button
-              icon={<Printer />}
-              buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition"
-            />
             <Button
               icon={<Funnel size={18} />}
               onClick={() => setShowFilter((prev) => !prev)}

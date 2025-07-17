@@ -2,7 +2,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface RainyDayData {
   id: number;
-  rainy_day: string;
+  rainy_day: number;
   date: string;
 }
 

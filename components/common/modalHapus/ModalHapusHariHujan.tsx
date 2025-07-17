@@ -5,7 +5,7 @@ import { X, Trash2 } from "lucide-react";
 
 interface ModalHapusProps {
   show: boolean;
-  data: { date: string; rainyDay: number } | null;
+  data: { date: string; rainyDay: string } | null;
   onClose: () => void;
   onDelete: () => void;
 }

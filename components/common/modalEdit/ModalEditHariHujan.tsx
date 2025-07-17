@@ -7,7 +7,7 @@ import InputField from "@/components/common/InputField";
 interface TabelHariHujan {
   id: number;
   date: string;
-  rainyDay: number;
+  rainyDay: string;
 }
 
 interface ModalEditHariHujanProps {
@@ -53,9 +53,7 @@ export default function ModalEditHariHujan({
                 label="Hari Hujan"
                 type="number"
                 value={data.rainyDay.toString()}
-                onChange={(e) =>
-                  setData({ ...data, rainyDay: Number(e.target.value) })
-                }
+                onChange={(e) => setData({ ...data, rainyDay: e.target.value })}
               />
             </div>
 

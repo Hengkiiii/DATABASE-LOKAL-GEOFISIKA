@@ -4,7 +4,7 @@ interface UpdateRainyDayResponse {
   data: {
     id: number;
     date: string;
-    rainy_day: number;
+    rainy_day: string;
   };
 }
 export async function updateRainyDay(
@@ -12,7 +12,7 @@ export async function updateRainyDay(
   user_id: string,
   dataUpdate: {
     date: string;
-    rainy_day: number;
+    rainy_day: string;
   }
 ): Promise<UpdateRainyDayResponse> {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

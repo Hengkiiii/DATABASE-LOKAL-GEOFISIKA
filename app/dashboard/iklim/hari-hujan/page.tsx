@@ -158,7 +158,7 @@ export default function HariHujanPage() {
             />
             <InputField
               label="Hari Hujan"
-              type="text"
+              type="number"
               value={hariHujan}
               onChange={(e) => setHariHujan(e.target.value)}
             />

@@ -13,6 +13,10 @@ import { deleteDataMicrothermor } from "@/lib/api/microthermor/microthermor-dele
 import { updateDataMicrothermor } from "@/lib/api/microthermor/microthermor-update/router";
 import { getMicrothermorByTDOM } from "@/lib/api/microthermor/microthermor-get-by-TDOM/router";
 import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { getImageBase64 } from "@/constants/imageToBase64";
 import "react-toastify/dist/ReactToastify.css";
 
 interface SensifitasData {
@@ -34,8 +38,11 @@ interface MicrothermorResponse {
   TDOM: string;
   KG: string;
 }
+interface TabelSeismisitasProps {
+  reload?: boolean;
+}
 
-export default function TabelSeismisitas() {
+export default function TabelSeismisitas({ reload }: TabelSeismisitasProps) {
   const [showFilter, setShowFilter] = useState(false);
   const [minTdom, setMinTdom] = useState("");
   const [maxTdom, setMaxTdom] = useState("");
@@ -50,6 +57,7 @@ export default function TabelSeismisitas() {
   const [selectedData, setSelectedData] = useState<SensifitasData | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<SensifitasData | null>(null);
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   const fetchAllData = async () => {
     try {
@@ -73,6 +81,10 @@ export default function TabelSeismisitas() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAllData();
+  }, [reload]);
 
   const fetchDataByTDOM = async () => {
     if (!minTdom || !maxTdom) {
@@ -112,6 +124,137 @@ export default function TabelSeismisitas() {
       setIsLoading(false);
       setShowFilter(false);
     }
+  };
+  const generatePDF = async () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const logoBase64 = await getImageBase64("/LogoBMKG.png");
+    doc.addImage(logoBase64, "PNG", 0, 10, 40, 25);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA", 105, 16, {
+      align: "center",
+    });
+    doc.setFontSize(13);
+    doc.text("STASIUN GEOFISIKA KLAS III KEPAHIANG BENGKULU", 105, 23, {
+      align: "center",
+    });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      "Jl. Pembangunan No. 156 Pasar Ujung Kepahiang - Bengkulu  Telp: (0732)391267",
+      105,
+      29,
+      { align: "center" }
+    );
+    doc.text(
+      "Fax: (0732)391600 / (0732)391578  Kode Pos 39172  E-Mail : stageof.kepahiang@bmkg.go.id",
+      105,
+      34,
+      { align: "center" }
+    );
+
+    doc.setLineWidth(0.8);
+    doc.line(0, 38, 220, 38);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Laporan Data Peta Rawan Gempa (TDOM)", 105, 48, {
+      align: "center",
+    });
+
+    if (minTdom && maxTdom) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.text(`Filter TDOM: ${minTdom} - ${maxTdom}`, 105, 55, {
+        align: "center",
+      });
+    }
+
+    const currentDate = new Date().toLocaleDateString("id-ID");
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.text(`Dicetak pada: ${currentDate}`, 105, 61, { align: "center" });
+
+    const tableData = dataMicrothermor.map((item, index) => [
+      index + 1,
+      item.lat,
+      item.long,
+      item.Fo,
+      item.Ao,
+      item.Tdom,
+      item.Kg,
+    ]);
+
+    autoTable(doc, {
+      head: [
+        [
+          "No",
+          "Latitude",
+          "Longitude",
+          "F0 (Hz)",
+          "Ao (mm/s)",
+          "Tdom (s)",
+          "Kg",
+        ],
+      ],
+      body: tableData,
+      startY: 68,
+      margin: { left: 10, right: 10 },
+      styles: {
+        cellPadding: 3,
+        fontSize: 9,
+        valign: "middle",
+        halign: "center",
+        font: "helvetica",
+        lineColor: [0, 0, 0],
+        lineWidth: 0.3,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: "bold",
+        fontSize: 10,
+      },
+      alternateRowStyles: {
+        fillColor: [250, 250, 250],
+      },
+    });
+
+    const fileName =
+      minTdom && maxTdom
+        ? `Laporan_Seismisitas_TDOM_${minTdom}_${maxTdom}.pdf`
+        : "Laporan_Seismisitas_Semua_Data.pdf";
+
+    doc.save(fileName);
+  };
+  const exportToExcel = () => {
+    const worksheetData = dataMicrothermor.map((item, index) => ({
+      No: index + 1,
+      Latitude: item.lat,
+      Longitude: item.long,
+      "F0 (Hz)": item.Fo,
+      "Ao (mm/s)": item.Ao,
+      "Tdom (s)": item.Tdom,
+      Kg: item.Kg,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Seismisitas");
+
+    const fileName =
+      minTdom && maxTdom
+        ? `Laporan_Seismisitas_TDOM_${minTdom}_${maxTdom}.xlsx`
+        : "Laporan_Seismisitas_Semua_Data.xlsx";
+
+    XLSX.writeFile(workbook, fileName);
   };
 
   useEffect(() => {
@@ -233,12 +376,37 @@ export default function TabelSeismisitas() {
   return (
     <Card style="relative bg-white p-6 md:p-8 space-y-6 shadow-xl rounded-2xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Data Seismisitas</h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          Data Peta Rawan Gempa
+        </h2>
         <div className="relative flex gap-2">
           <Button
             icon={<Printer />}
             buttonStyle="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium shadow-md hover:scale-105 transition cursor-pointer"
+            onClick={() => setShowExportOptions((prev) => !prev)}
           />
+          {showExportOptions && (
+            <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg w-40 z-50">
+              <button
+                onClick={() => {
+                  generatePDF();
+                  setShowExportOptions(false);
+                }}
+                className="w-full text-left px-4 py-2 rounded-t-lg cursor-pointer hover:bg-gray-100"
+              >
+                Download PDF
+              </button>
+              <button
+                onClick={() => {
+                  exportToExcel();
+                  setShowExportOptions(false);
+                }}
+                className="w-full text-left px-4 py-2 rounded-b-lg cursor-pointer hover:bg-gray-100"
+              >
+                Download Excel
+              </button>
+            </div>
+          )}
           <Button
             icon={<Funnel size={18} />}
             onClick={() => setShowFilter((prev) => !prev)}
