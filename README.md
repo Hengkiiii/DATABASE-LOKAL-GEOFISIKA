@@ -63,7 +63,7 @@ $ cd DATABASE-LOKAL-GEOFISIKA
 $ npm install
 ```
 
-Buat file **`.env.local`**:
+Buat file **`.env`**:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://api.kamu.com/api
