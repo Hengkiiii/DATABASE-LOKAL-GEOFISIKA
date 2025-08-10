@@ -45,7 +45,7 @@ Coba langsung: **[https://database-lokal-geofisika-theta.vercel.app](https://dat
 
 | Layer           | Stack                                          |
 | --------------- | ---------------------------------------------- |
-| **Frontend**    | Next.js 14, React 18, TypeScript, Tailwind CSS |
+| **Frontend**    | Next.js 15, React 19, TypeScript, Tailwind CSS |
 | **Peta**        | Leaflet 1.9, React‑Leaflet 4                   |
 | **Data**        | File statis JSON/GeoJSON atau REST API         |
 | **CI & Deploy** | GitHub Actions, Vercel Edge Runtime            |
@@ -118,3 +118,4 @@ MIT © 2025 [Bhinneka Dev](https://github.com/BhinnekaDev)
 <p align="center"><sub>Bhinneka Developer © 2025</sub></p>
 
 ---
+
