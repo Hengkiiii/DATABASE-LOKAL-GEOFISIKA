@@ -10,6 +10,7 @@ const InputField: FC<FloatingLabelFormProps> = ({
   placeholder,
   value,
   accept,
+  extraContent,
   onChange,
 }) => {
   const isDarkMode = useMedia("(prefers-color-scheme: dark)", false);
@@ -47,6 +48,10 @@ const InputField: FC<FloatingLabelFormProps> = ({
           } outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500`}
         />
       </div>
+      {/* Extra content (optional) */}
+      {extraContent && (
+        <div className="mt-1 text-xs text-gray-500">{extraContent}</div>
+      )}
     </div>
   );
 };

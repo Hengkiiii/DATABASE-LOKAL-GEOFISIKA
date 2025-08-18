@@ -182,16 +182,24 @@ export default function Page() {
                 />
                 <InputField
                   label="File"
+                  value=""
                   type="file"
-                  value={file ? file.name : ""}
                   onChange={handleFileChange}
                   extraContent={
-                    <p className="text-xs mt-1">
-                      <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2 font-bold">
-                        EXT :
-                      </span>
-                      besar file ≤ 4MB
-                    </p>
+                    <div className="mt-1 text-xs">
+                      {file && (
+                        <p className="text-gray-600">
+                          File terpilih:{" "}
+                          <span className="font-semibold">{file.name}</span>
+                        </p>
+                      )}
+                      <p>
+                        <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2 font-bold">
+                          EXT :
+                        </span>
+                        besar file ≤ 4MB
+                      </p>
+                    </div>
                   }
                 />
               </>
