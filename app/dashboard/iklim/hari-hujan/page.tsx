@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function HariHujanPage() {
   const { isOpenModal, setIsOpenModal } = useModal();
-  const [tanggal, setTanggal] = useState("");
+  const [periode, setPeriode] = useState(""); // format YYYY-MM
   const [hariHujan, setHariHujan] = useState("");
   const [inputType, setInputType] = useState("manual");
   const [file, setFile] = useState<File | null>(null);
@@ -21,14 +21,13 @@ export default function HariHujanPage() {
   const [reload, setReload] = useState(false);
   const handleReload = () => setReload(!reload);
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    setTanggal(dateValue);
+  const handlePeriodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPeriode(e.target.value);
     setHariHujan("");
   };
 
   const resetForm = () => {
-    setTanggal("");
+    setPeriode("");
     setHariHujan("");
     setFile(null);
     setFileBase64("");
@@ -60,15 +59,23 @@ export default function HariHujanPage() {
         toast.error("User ID tidak ditemukan. Silakan login ulang.");
         return;
       }
-      if (!tanggal) {
-        toast.warning("Tanggal harus diisi");
+      if (!periode) {
+        toast.warning("Bulan dan tahun harus diisi");
         return;
       }
       if (!hariHujan || !/^\d+$/.test(hariHujan)) {
         toast.warning("Hari hujan harus berupa angka positif");
         return;
       }
-      await tambahDataHariHujan(user_id, Number(hariHujan), tanggal);
+      const jumlahHari = Number(hariHujan);
+      if (jumlahHari < 1 || jumlahHari > 31) {
+        toast.warning("Jumlah hari hujan harus antara 1 - 31");
+        return;
+      }
+
+      // simpan dengan format YYYY-MM-DD (default tanggal 01)
+      await tambahDataHariHujan(user_id, jumlahHari, `${periode}-01`);
+
       toast.success("Data hari hujan berhasil ditambahkan");
       setIsOpenModal(false);
       resetForm();
@@ -143,6 +150,7 @@ export default function HariHujanPage() {
               text="Input Otomatis"
             />
           </div>
+          {/* Input Manual */}
           <div
             className={`space-y-4 mt-6 px-6 ${
               inputType === "manual"
@@ -151,18 +159,21 @@ export default function HariHujanPage() {
             } transition-all duration-500 ease-in-out`}
           >
             <InputField
-              label="Tanggal"
-              type="date"
-              value={tanggal}
-              onChange={handleDateChange}
+              label="Bulan & Tahun"
+              type="month"
+              value={periode}
+              onChange={handlePeriodeChange}
             />
             <InputField
-              label="Hari Hujan"
+              label="Jumlah Hari Hujan"
               type="number"
+              min={1}
+              max={31}
               value={hariHujan}
               onChange={(e) => setHariHujan(e.target.value)}
             />
           </div>
+          {/* Input Otomatis */}
           <div
             className={`space-y-4 mt-6 px-6 ${
               inputType === "otomatis"
@@ -186,11 +197,12 @@ export default function HariHujanPage() {
               </label>
               <p className="text-xs text-black mt-2">
                 Format file harus berisi{" "}
-                <strong className="text-red-800">tanggal</strong> dan{" "}
+                <strong className="text-red-800">bulan & tahun</strong> dan{" "}
                 <strong className="text-red-800">jumlah hari hujan</strong>
               </p>
             </div>
           </div>
+          {/* Tombol Aksi */}
           <div className="flex justify-end space-x-3 mt-6 px-6 pb-4">
             <Button
               type="button"

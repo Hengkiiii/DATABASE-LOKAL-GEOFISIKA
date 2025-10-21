@@ -361,11 +361,15 @@ export default function GempaPage() {
               </div>
               <p className="text-xs text-black mt-2">
                 Format file harus berisi kolom{" "}
-                <strong className="text-red-800">date_time</strong>,{" "}
-                <strong className="text-red-800">latitude</strong>,{" "}
-                <strong className="text-red-800">longitude</strong>,{" "}
-                <strong className="text-red-800">depth</strong>, dan{" "}
-                <strong className="text-red-800">magnitude</strong>.
+                <strong className="text-red-800">Waktu</strong>,{" "}
+                <strong className="text-red-800">MMI</strong>,{" "}
+                <strong className="text-red-800">Deskripsi</strong>,{" "}
+                <strong className="text-red-800">Kedalaman</strong>,{" "}
+                <strong className="text-red-800">Lintang</strong>,{" "}
+                <strong className="text-red-800">Bujur</strong>,{" "}
+                <strong className="text-red-800">Magnitudo</strong>,{" "}
+                <strong className="text-red-800">Observer</strong> dan{" "}
+                <strong className="text-red-800">Tanggal</strong>.
               </p>
             </div>
           )}

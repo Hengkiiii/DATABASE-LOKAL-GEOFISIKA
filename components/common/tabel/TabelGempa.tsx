@@ -215,6 +215,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       format: "a4",
     });
 
+    // === Header BMKG ===
     const logoBase64 = await getImageBase64("/LogoBMKG.png");
     doc.addImage(logoBase64, "PNG", 15, 10, 40, 25);
     doc.setFont("helvetica", "bold");
@@ -246,6 +247,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
     doc.setFontSize(16);
     doc.text("Laporan Data Gempa", 148.5, 45, { align: "center" });
 
+    // === Periode Data ===
     if (startDate && endDate) {
       const formatTanggal = (tanggal: string) => {
         const date = new Date(tanggal);
@@ -265,28 +267,51 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       });
     }
 
+    // === Tanggal Cetak ===
     const currentDate = new Date().toLocaleDateString("id-ID");
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
     doc.text(`Dicetak pada: ${currentDate}`, 148.5, 58, { align: "center" });
 
-    const tableData = gempaData.map((item, index) => [
-      index + 1,
-      formatTanggalWIB(item.dateTime),
-      item.lintang || "-",
-      item.bujur || "-",
-      item.kedalaman?.toString() || "-",
-      item.magnitudo?.toString() || "-",
-      item.mmi || "-",
-      item.keterangan || "-",
-      item.observer || "-",
-    ]);
+    // === Pisah Tanggal dan Waktu ===
+    const pisahTanggalWaktu = (dateTimeStr: string) => {
+      const date = new Date(dateTimeStr);
+      const tanggal = date.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+      const waktu = date.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      return { tanggal, waktu };
+    };
 
+    const tableData = gempaData.map((item, index) => {
+      const { tanggal, waktu } = pisahTanggalWaktu(item.dateTime);
+      return [
+        index + 1,
+        tanggal,
+        waktu,
+        item.lintang || "-",
+        item.bujur || "-",
+        item.kedalaman?.toString() || "-",
+        item.magnitudo?.toString() || "-",
+        item.mmi || "-",
+        item.keterangan || "-",
+        item.observer || "-",
+      ];
+    });
+
+    // === Tabel Data Gempa ===
     autoTable(doc, {
       head: [
         [
           "No.",
           "Tanggal",
+          "Waktu",
           "Lintang",
           "Bujur",
           "Kedalaman (km)",
@@ -330,11 +355,41 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
         4: { cellWidth: 25 },
         5: { cellWidth: 25 },
         6: { cellWidth: 20 },
-        7: { cellWidth: 70 },
-        8: { cellWidth: 30 },
+        7: { cellWidth: 15 },
+        8: { cellWidth: 55 },
+        9: { cellWidth: 30 },
       },
     });
 
+    // === Tanda Tangan (rata kanan presisi) ===
+    const tableY = (doc as any).lastAutoTable.finalY + 15;
+    const tanggalCetak = new Date().toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginRight = 20;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Kepahiang, ${tanggalCetak}`, pageWidth - marginRight, tableY, {
+      align: "right",
+    });
+    doc.text(
+      "Kepala Stasiun Geofisika Kepahiang Bengkulu",
+      pageWidth - marginRight,
+      tableY + 7,
+      { align: "right" }
+    );
+    doc.text("Anton Sugiharto, S.Kom", pageWidth - marginRight, tableY + 35, {
+      align: "right",
+    });
+    doc.text("NIP. 197411201994031001", pageWidth - marginRight, tableY + 42, {
+      align: "right",
+    });
+
+    // === Simpan PDF ===
     const fileName =
       startDate && endDate
         ? `Laporan_Data_Gempa_${startDate}_${endDate}.pdf`
@@ -346,7 +401,12 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
   const exportToExcel = (data: GempaData[]) => {
     const worksheetData = data.map((item, index) => ({
       No: index + 1,
-      Tanggal: new Date(item.dateTime).toLocaleString("id-ID"),
+      Tanggal: new Date(item.dateTime).toLocaleDateString("id-ID"),
+      "Waktu (WIB)": new Date(item.dateTime).toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
       Lintang: item.lintang,
       Bujur: item.bujur,
       "Kedalaman (km)": item.kedalaman,
@@ -356,15 +416,47 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       Observer: item.observer,
     }));
 
+    // Buat worksheet dari data gempa
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+
+    // Hitung baris terakhir data
+    const lastRow = worksheetData.length + 2;
+
+    // Ambil tanggal cetak hari ini (misalnya 20 Oktober 2025)
+    const tanggalCetak = new Date().toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+
+    // Tambahkan keterangan di bawah tabel
+    XLSX.utils.sheet_add_aoa(
+      worksheet,
+      [
+        [],
+        [`Kepahiang, ${tanggalCetak}`],
+        [`Kepala Stasiun Geofisika Kepahiang Bengkulu`],
+        [],
+        [],
+        [],
+        [],
+        [`Anton Sugiharto, S.Kom`],
+        [`NIP. 197411201994031001`],
+      ],
+      { origin: `A${lastRow}` } // Tambahkan mulai dari baris terakhir
+    );
+
+    // Tambahkan sheet ke workbook
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data Gempa");
 
+    // Tentukan nama file
     const fileName =
       startDate && endDate
         ? `Laporan_Data_Gempa_${startDate}_${endDate}.xlsx`
-        : "Laporan_Data_Gempa_Semua_Data.xlsx";
+        : `Laporan_Data_Gempa_${tanggalCetak.replace(/\s/g, "_")}.xlsx`;
 
+    // Simpan file Excel
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -589,10 +681,11 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
             <thead className="bg-gray-100 text-gray-600">
               <tr>
                 <th className="py-3 px-5 text-left">No.</th>
+                <th className="py-3 px-5 text-left">Tanggal</th>
                 <th className="py-3 px-5 text-left">Waktu</th>
                 <th className="py-3 px-5 text-left">Lintang</th>
                 <th className="py-3 px-5 text-left">Bujur</th>
-                <th className="py-3 px-5 text-left">Kedalaman (km)</th>
+                <th className="py-3 px-5 text-left">Kedalaman</th>
                 <th className="py-3 px-5 text-left">Magnitudo</th>
                 <th className="py-3 px-5 text-left">MMI</th>
                 <th className="py-3 px-5 text-left">Keterangan</th>
@@ -603,53 +696,71 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-4 text-gray-500">
+                  <td colSpan={11} className="text-center py-4 text-gray-500">
                     Memuat data...
                   </td>
                 </tr>
               ) : paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => (
-                  <tr
-                    key={index}
-                    className={`${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } hover:bg-gray-100 transition`}
-                  >
-                    <td className="py-3 px-5">
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td className="py-3 px-5">
-                      {formatTanggalWIB(item.dateTime)}
-                    </td>
-                    <td className="py-3 px-5">{item.lintang}</td>
-                    <td className="py-3 px-5">{item.bujur}</td>
-                    <td className="py-3 px-5">{item.kedalaman}</td>
-                    <td className="py-3 px-5">{item.magnitudo}</td>
-                    <td className="py-3 px-5">{item.mmi || "-"}</td>
-                    <td className="py-3 px-5">{item.keterangan}</td>
-                    <td className="py-3 px-5">{item.observer}</td>
-                    <td className="py-3 px-5">
-                      <div className="flex justify-center gap-3">
-                        <Button
-                          icon={<Pencil />}
-                          onClick={() => handleEditClick(item)}
-                          buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
-                        />
-                        <Button
-                          icon={<Trash2 />}
-                          onClick={() => {
-                            setDataToDelete(item);
-                            setShowDeleteModal(true);
-                          }}
-                          buttonStyle="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                paginatedData.map((item, index) => {
+                  const tanggal = new Date(item.dateTime).toLocaleDateString(
+                    "id-ID",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  );
+                  const waktu = new Date(item.dateTime).toLocaleTimeString(
+                    "id-ID",
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    }
+                  );
+
+                  return (
+                    <tr
+                      key={index}
+                      className={`${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      } hover:bg-gray-100 transition`}
+                    >
+                      <td className="py-3 px-5">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
+                      <td className="py-3 px-5">{tanggal}</td>
+                      <td className="py-3 px-5">{waktu}</td>
+                      <td className="py-3 px-5">{item.lintang}</td>
+                      <td className="py-3 px-5">{item.bujur}</td>
+                      <td className="py-3 px-5">{item.kedalaman}</td>
+                      <td className="py-3 px-5">{item.magnitudo}</td>
+                      <td className="py-3 px-5">{item.mmi || "-"}</td>
+                      <td className="py-3 px-5">{item.keterangan}</td>
+                      <td className="py-3 px-5">{item.observer}</td>
+                      <td className="py-3 px-5">
+                        <div className="flex justify-center gap-3">
+                          <Button
+                            icon={<Pencil />}
+                            onClick={() => handleEditClick(item)}
+                            buttonStyle="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
+                          />
+                          <Button
+                            icon={<Trash2 />}
+                            onClick={() => {
+                              setDataToDelete(item);
+                              setShowDeleteModal(true);
+                            }}
+                            buttonStyle="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md hover:scale-105 transition cursor-pointer"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={10} className="text-center py-4 text-gray-500">
+                  <td colSpan={11} className="text-center py-4 text-gray-500">
                     Data tidak ditemukan.
                   </td>
                 </tr>

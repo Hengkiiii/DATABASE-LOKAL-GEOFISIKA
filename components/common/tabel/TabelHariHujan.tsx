@@ -71,13 +71,24 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
 
   const handleFilter = async () => {
     if (!startDate || !endDate) {
-      toast.warning("Pilih tanggal mulai dan tanggal akhir");
+      toast.warning("Pilih periode mulai dan periode akhir");
       return;
     }
     try {
       setLoading(true);
-      const data = await getRainyDaysByDate(startDate, endDate);
-      console.log("Filtered Data:", data);
+
+      // Ubah startDate dan endDate jadi YYYY-MM-DD
+      const start = `${startDate}-01`; // contoh: 2025-09 → 2025-09-01
+      const end = new Date(
+        parseInt(endDate.split("-")[0]), // tahun
+        parseInt(endDate.split("-")[1]), // bulan (1-12)
+        0 // hari ke-0 = hari terakhir bulan sebelumnya
+      )
+        .toISOString()
+        .slice(0, 10); // hasil 2025-10-31
+
+      const data = await getRainyDaysByDate(start, end);
+
       const mapped: TabelHariHujan[] = data.map(
         (item: RainyDayAPIResponse) => ({
           id: item.id,
@@ -85,11 +96,12 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
           rainyDay: item.rainy_day,
         })
       );
+
       setDataHariHujan(mapped);
       sessionStorage.setItem("rainyDaysData", JSON.stringify(mapped));
       setShowFilter(false);
     } catch {
-      toast.error("Gagal memuat data untuk diedit");
+      toast.error("Gagal memuat data untuk difilter");
     } finally {
       setLoading(false);
     }
@@ -160,6 +172,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
         }
       );
     }
+
     const currentDate = new Date().toLocaleDateString("id-ID");
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
@@ -170,7 +183,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       item.rainyDay,
     ]);
     autoTable(doc, {
-      head: [["No.", "Tanggal", "Hari Hujan"]],
+      head: [["No.", "Bulan", "Hari Hujan"]],
       body: tableData,
       startY: 68,
       margin: { left: 15, right: 15 },
@@ -209,7 +222,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
   const exportToExcel = () => {
     const worksheetData = dataHariHujan.map((item, index) => ({
       No: index + 1,
-      Tanggal: item.date,
+      Bulan: formatDate(item.date), // ✅ Bulan + Tahun
       "Hari Hujan": item.rainyDay,
     }));
 
@@ -230,9 +243,10 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       const item = await getRainyDay(id);
       const mapped = {
         id: item.id,
-        date: item.date,
+        date: item.date.slice(0, 7), // ambil hanya "YYYY-MM"
         rainyDay: item.rainyDay,
       };
+
       setSelectedData(mapped);
       setShowEditModal(true);
     } catch {
@@ -247,15 +261,25 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       toast.error("User ID tidak ditemukan");
       return;
     }
+
     try {
       setLoading(true);
+
+      // Pastikan format date = YYYY-MM-DD
+      const normalizedDate =
+        selectedData.date.length === 7
+          ? `${selectedData.date}-01`
+          : selectedData.date;
+
       await updateRainyDay(selectedData.id.toString(), user_id, {
-        date: selectedData.date,
+        date: normalizedDate,
         rainy_day: selectedData.rainyDay,
       });
+
       toast.success("Data berhasil diupdate!");
       setShowEditModal(false);
       setSelectedData(null);
+
       if (startDate && endDate) {
         await handleFilter();
       } else {
@@ -267,6 +291,8 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
       } else {
         toast.error("Terjadi kesalahan saat memperbarui data");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -298,10 +324,9 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
   };
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
-    const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return `${month}-${year}`;
   };
 
   return (
@@ -348,14 +373,14 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
                 className="absolute right-0 top-12 z-50 border border-gray-200 rounded-lg shadow-lg p-4 w-64 bg-white space-y-3"
               >
                 <InputField
-                  label="Dari Tanggal:"
-                  type="date"
+                  label="Dari Periode:"
+                  type="month"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
                 <InputField
-                  label="Sampai Tanggal:"
-                  type="date"
+                  label="Sampai Periode:"
+                  type="month"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
@@ -386,7 +411,7 @@ export default function TableHariHujan({ reload }: TabelHariHujanProps) {
             <thead className="bg-gray-100 text-gray-600">
               <tr>
                 <th className="py-3 px-5 text-left">No.</th>
-                <th className="py-3 px-5 text-left">Tanggal</th>
+                <th className="py-3 px-5 text-left">Bulan</th>
                 <th className="py-3 px-5 text-left">Hari Hujan</th>
                 <th className="py-3 px-5 text-center">Aksi</th>
               </tr>

@@ -12,5 +12,7 @@ export interface FloatingLabelFormProps {
   darkMode?: boolean; // Mode gelap (opsional)
   accept?: string; // Tipe file yang diterima (misalnya, untuk input file)
   extraContent?: React.ReactNode;
+  min?: number;
+  max?: number;
   step?: string;
 }

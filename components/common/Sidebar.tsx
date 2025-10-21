@@ -283,7 +283,7 @@ export default function Sidebar() {
           {/* Dropdown untuk Peta Sestifitas */}
           <SubSidebarItem
             index={6}
-            label="Peta "
+            label="Peta TDOM"
             collapsed={collapsed}
             route="/dashboard/geofisika/peta-sestifitas"
             icon={<span className="w-2 h-2" />}
