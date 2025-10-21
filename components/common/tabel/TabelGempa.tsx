@@ -13,9 +13,9 @@ import { deleteEarthquake } from "@/lib/api/earthquake/earthquake-delete/router"
 import { updateEarthquake } from "@/lib/api/earthquake/earthquake-update/router";
 import { getDataGempaByDate } from "@/lib/api/earthquake/earthquake-get-by-all-data/router";
 import { toast } from "react-toastify";
-import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
 import { getImageBase64 } from "@/constants/imageToBase64";
+import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 interface GempaData {
@@ -98,19 +98,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       setLoading(false);
     }
   };
-  const formatTanggalWIB = (isoString: string) => {
-    return (
-      new Date(isoString).toLocaleString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }) + " WIB"
-    );
-  };
+
   const handleFilter = async () => {
     try {
       setLoading(true);
@@ -362,7 +350,9 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
     });
 
     // === Tanda Tangan (rata kanan presisi) ===
-    const tableY = (doc as any).lastAutoTable.finalY + 15;
+    const lastTable = (doc as jsPDF & { lastAutoTable?: { finalY: number } })
+      .lastAutoTable;
+    const tableY = lastTable ? lastTable.finalY + 15 : 30;
     const tanggalCetak = new Date().toLocaleDateString("id-ID", {
       day: "2-digit",
       month: "long",
