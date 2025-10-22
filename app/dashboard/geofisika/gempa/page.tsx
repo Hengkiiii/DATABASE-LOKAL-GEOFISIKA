@@ -9,6 +9,7 @@ import InputField from "@/components/common/InputField";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { tambahDataGempa } from "@/lib/api/earthquake/earthquake-insert/router";
+import { getEarthquakeAll } from "@/lib/api/earthquake/earthquake-get-all/router";
 import { tambahDataGempaExcel } from "@/lib/api/earthquake/earthquake-insert-excel/router";
 import { tambahDataGempaDariTeks } from "@/lib/api/earthquake/earthquake-insert-parse/router";
 
@@ -154,20 +155,47 @@ export default function GempaPage() {
     try {
       setIsLoading(true);
       const user_id = sessionStorage.getItem("user_id");
+
       if (!user_id) {
         toast.error("User ID tidak ditemukan, silakan login ulang");
         return;
       }
+
       if (!inputText.trim()) {
         toast.error("Silakan masukkan teks data gempa");
         return;
       }
+      const existingData = await getEarthquakeAll();
       const response = await tambahDataGempaDariTeks(user_id, inputText);
-      toast.success(
-        `Berhasil menambahkan ${
-          response.data?.length || 0
-        } data gempa dari teks`
+      const parsedData = response.data || [];
+      const duplicateItems = parsedData.filter((newItem) =>
+        existingData.some((oldItem) => {
+          const oldDate = new Date(oldItem.date_time);
+          const newDate = new Date(`${newItem.date}T${newItem.time}`);
+          return (
+            oldDate.getTime() === newDate.getTime() &&
+            Math.abs(oldItem.latitude - newItem.latitude) < 0.0001 &&
+            Math.abs(oldItem.longitude - newItem.longitude) < 0.0001 &&
+            oldItem.magnitude === newItem.magnitude
+          );
+        })
       );
+
+      if (duplicateItems.length === parsedData.length) {
+        toast.error("Data Gempa Sudah Tersedia");
+        return;
+      }
+
+      if (duplicateItems.length > 0) {
+        toast.warning(
+          `${duplicateItems.length} data duplikat diabaikan. ${
+            parsedData.length - duplicateItems.length
+          } data baru berhasil ditambahkan.`
+        );
+      } else {
+        toast.success(`Berhasil menambahkan Data Gempa`);
+      }
+
       setIsOpenModal(false);
       resetForm();
       handleReload();

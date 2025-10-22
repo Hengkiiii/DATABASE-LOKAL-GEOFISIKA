@@ -265,7 +265,7 @@ export default function Sidebar() {
           {/* Dropdown untuk Data Sestifitas */}
           <SubSidebarItem
             index={4}
-            label="Data Peta"
+            label="Data Peta Rawan Gempa"
             collapsed={collapsed}
             route="/dashboard/geofisika/data-sestifitas"
             icon={<span className="w-2 h-2" />}
@@ -274,7 +274,7 @@ export default function Sidebar() {
           {/* Dropdown untuk Peta */}
           <SubSidebarItem
             index={5}
-            label="Peta seismisitas"
+            label="Peta Seismisitas"
             collapsed={collapsed}
             route="/dashboard/geofisika/peta"
             icon={<span className="w-2 h-2" />}
@@ -283,7 +283,7 @@ export default function Sidebar() {
           {/* Dropdown untuk Peta Sestifitas */}
           <SubSidebarItem
             index={6}
-            label="Peta TDOM"
+            label="Peta Rawan Gempa"
             collapsed={collapsed}
             route="/dashboard/geofisika/peta-sestifitas"
             icon={<span className="w-2 h-2" />}

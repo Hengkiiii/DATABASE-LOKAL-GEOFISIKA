@@ -168,12 +168,14 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
             observer: item.observer_name,
           }));
           setGempaData(items);
+          setCurrentPage(1);
           sessionStorage.setItem("filteredGempaData", JSON.stringify(items));
         } else {
           toast.error(response.message || "Gagal memfilter data");
         }
       } else {
         await fetchAllData();
+        setCurrentPage(1);
       }
     } catch (err) {
       toast.error((err as Error).message || "Gagal memfilter data");
@@ -181,11 +183,9 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchAllData();
   }, [reload]);
-
   const totalPages = Math.ceil(gempaData.length / itemsPerPage);
   const paginatedData = gempaData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -511,7 +511,7 @@ export default function TabelGempa({ reload }: TabelGempaProps) {
         return;
       }
       await deleteEarthquake(dataToDelete.id, user_id);
-      toast.success("Data tekanan udara berhasil dihapus!");
+      toast.success("Data Gempa berhasil dihapus!");
       setShowDeleteModal(false);
       setDataToDelete(null);
       if (startDate && endDate) {
